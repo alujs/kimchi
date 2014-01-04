@@ -1,0 +1,34 @@
+List of all updates:
+
+MAIN.JS
+
+-Added a end screen and victory screen (lines 21-64)
+-
+
+PROJECTILE.JS
+-Changed animation and behavior of the projectile bullets 
+-added offset for accuracy on collision (line 10)
+-changes spreadfire behavior (line 27)
+
+PLAYER.JS
+-Collision changes (lines 12-13)
+-Max speed increase (line 14)
+-Changed character animation (lines 32-49) NO MORE DANTE!
+-fixed the bug that causes aniamtion of walking and firing conflicts (lines 68 - 70 & 97)
+-animation flow correction on my part, is needed! (lines 120)
+-I FREAKIN accidently overwrote the animation file in media and didn't have a back up for it. Well I do, but it's the one that doesn't work properly, I fixed it all up and spend awhile on it too and now I have ot do it all over again. Anyways, don't mind it, i"ll take care of it.
+
+
+AI.JS
+
+- I was thinking about it, and instead of having a decision, we can set a timer instead, and have the zombie attack once every (certain amount of time) like I did with the bullet fire. Then the zombie doesn't have to make a decision, AND it also doesn't make it so that the zombie doesn't attack ridiculously fast.
+
+ENEMY2.JS
+
+-Spiders shoot acid
+-Animations are not perfected yet.
+
+AI.JS
+
+-enemies do not randomly make decisons to attack anymore, instead they attack every 2 seconds.
+

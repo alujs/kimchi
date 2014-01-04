@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body>
+  <div class="normal">	
+	<h1> SIGN IN PLOX </h1>
+	<form class="auth">
+		<input class="user" type="text" placeholder="Username..." autofocus value="">
+		<input class="pw" type="Password" placeholder="Password..." value= "">
+		<input type="Submit">
+	</form> 
+  </div>
+  <div class="facebook">
+    <h1> OR SIGN IN WITH FACEBOOK </h1>
+    <p> Coming soon... </p>
+  </div>
+  <script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
+  <script>
+  	$(document).ready(function() {
+  	  $(".auth").submit(function() {
+  	  	event.preventDefault();
+  	  	var user = $(".user").val();
+  	  	var pw = $(".pw").val();
+  	  	$.post( "/signin",{'user': user, 'pw': pw}, function(data){
+          window.location = data; 
+        });
+
+  	  })
+  	})
+  </script>
+</body>
+</html>
