@@ -4,7 +4,7 @@ var express = require('express'),
     root = __dirname + '/impact/',
     app = express();
 var io = require('socket.io');
-var game = require('./server/game_server.js'); // <-- The real meat of the server, refer to game_server.js 
+var game = require('./server/game_server.js'); 
 var server = require('http').createServer(app)
     io = io.listen(server);
 
