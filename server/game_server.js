@@ -3,13 +3,15 @@ var io = require('socket.io'),
   hasCulled = false,
   db = require('firebase'),
   zomb = require('./helpers/ai.js'),
-  pl = require('./helpers/player.js');
+  pl = require('./helpers/player.js'),
+  util = require('./helpers/utilities.js');
 
 var rooms = {};  
 var ids = {};   
 var base = {}; 
 var name_base = {};   
 var scores = {}; 
+var seed = {};
 
 
 
@@ -78,17 +80,22 @@ exports.handler = function( socket ) {
   	instance.playerList[name] = true;
   });
 
-  var cullPlayers = function( instance ) { 
+  var cullPlayers = function( instance ) {
+    var hasPlayers = false;  
     for(var i in instance.playerList) {   
       if(instance.playerList[i] === true) { 
-      	instance.playerList[i] = i;      
+      	instance.playerList[i] = i;
+        hasPlayers = true;       
       } else {
       	for(var x in instance.socketid) {
   	      io.sockets.socket(instance.socketid[x]).emit('deletePlayer', i)
   	    }                               
       }                                
     }
-    hasCulled = false; 
+    hasCulled = false;
+    if(!hasPlayers) {
+      util('nukeRoom', instance)
+    } 
   };
  
  socket.on('firing', function( x, y, direction, animation, gamename ) {
@@ -131,7 +138,6 @@ exports.handler = function( socket ) {
     var instance = ids[socket.id]; 
     scores[instance].name[kb].kills += 1; 
     scores[instance].name[kb].score += points;
-
     name_base[kb].child('kills').set( scores[instance].name[kb].kills );
     name_base[kb].child('score').set( scores[instance].name[kb].score );
  });
