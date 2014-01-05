@@ -6,12 +6,13 @@ module.exports = function( type, args ) {
 	ut.resync = function( arr ) { // room and list of entities
 	  var bound = arr.length; 
 		var selection = Math.floor(Math.random()*bound);
-	  return syncArray[selection];
+	  return arr[selection];
   };
 
 
 	ut.nukeRoom = function( room ) {
-		var target =  new db('https://hrproj.firebaseio.com/' + room);
+		console.log("DEISE ROOM IST KAPUT");
+		var target =  new db('https://hrproj.firebaseio.com/Rooms/' + room);
 		target.remove();
 	};
 
@@ -24,8 +25,10 @@ module.exports = function( type, args ) {
 	ut.killPlayer = function() {
 		
 	};
-
-
-
-  ut[type](args);   
+  
+  if(type === 'resync') {
+  	return ut[type](args); 
+  } else {
+  	ut[type](args);  
+  }  
 }

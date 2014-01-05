@@ -153,8 +153,8 @@ ig.module (
         this.canShoot = false;
       }
       if (this.netTimer < 1) {
-        this.netTimer = 10;
-        socket.emit('updatemove', this.pos.x, this.pos.y, this.currentAnimation, this.gamename);
+        this.netTimer = 20;
+        socket.emit('updatemove', this.pos.x, this.pos.y, this.currentAnimation, this.gamename, this.vel.x, this.vel.y);
       }
       this.netTimer = this.netTimer - 1;
       if (this.health < 200) {
@@ -182,6 +182,8 @@ ig.module (
     animation: 'idledown', // Small shit man, small shit that gets you =( 
     destinationx: 99999999,
     destinationy: 99999999,
+    movey: 0,
+    movex: 0,
     collides: ig.Entity.COLLIDES.PASSIVE,
     direction: 0,
     
@@ -210,12 +212,11 @@ ig.module (
       this.parent(x, y, settings);
 
     },
-    netMovePlayer: function() {
-      this.pos.x = positionx;
-      this.pos.y = positiony;
-    },
+   
     update: function() {
       this.currentAnim = this.anims[this.animation]; // So delicious. 
+      this.vel.x = this.movex;
+      this.vel.y = this.movey;
     }
 
 

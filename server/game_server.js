@@ -1,10 +1,10 @@
-var io = require('socket.io'),
+var io = require('socket.io'), // refactor this entire thing to use Socket.io rooms. Le sigh.
   once = false,
-  hasCulled = false,
   db = require('firebase'),
   zomb = require('./helpers/ai.js'),
   pl = require('./helpers/player.js'),
   util = require('./helpers/utilities.js');
+  
 
 var rooms = {};  
 var ids = {};   
@@ -13,7 +13,8 @@ var name_base = {};
 var scores = {}; 
 var seed = {};
 var entity = {};
-
+var hasCulled = false; 
+var hasCalled = true; 
 
 exports.setIO = function( obj ) { // 
 	io = obj;                    
@@ -26,12 +27,14 @@ exports.handler = function( socket ) {
   	if(rooms[room] === undefined) { 
   		rooms[room] = {};            
   		rooms[room].playerList = {}; 
-  		rooms[room].socketid = {};  
+  		rooms[room].socketid = {};
+      rooms[room].playerCount = 1;   
   		rooms[room].playerList[instance_name] = instance_name; // Also instances are needed so we can have
   		rooms[room].socketid[socket.id] = socket.id; // unlimited games hosted. 
   	} else {
       rooms[room].playerList[instance_name] = instance_name;
       rooms[room].socketid[socket.id] = socket.id;
+      rooms[room].playerCount += 1;
   	}
   	ids[socket.id] = room; // A bit on Socket io. Each client has a unique socket id that is 'permanent'
   });                     
@@ -46,28 +49,34 @@ exports.handler = function( socket ) {
   	}
   });
 
-  socket.on('updatemove', function( x, y, animation, client_name ) { // eventually store and do checking before broadcasting
+  socket.on('updatemove', function( x, y, animation, client_name, velx, vely ) { // eventually store and do checking before broadcasting
   	var instance = ids[socket.id];
         instance = rooms[instance];
 
     for(var i in instance.socketid) { // My next refactoring will be to use velocity rather than x/y
-  	  io.sockets.socket(instance.socketid[i]).emit('moveplayer', x, y, animation, client_name);
+  	  io.sockets.socket(instance.socketid[i]).emit('moveplayer', x, y, animation, client_name, velx, vely);
   	}                                
   });
 
   socket.on('disconnect', function() { 
   	var instance = ids[socket.id];
-        instance = rooms[instance];   
+        instance = rooms[instance];
+    var counter = instance.playerCount;
+    var room = ids[socket.id];   
     console.log("A client has disconnected from an instance:  " + instance)
-    
+    counter -= 1; 
+    if(counter === 0) {
+      return util('nukeRoom', room);
+    }
+
     for(var i in instance.socketid) {
   	  io.sockets.socket(instance.socketid[i]).emit('rollcall');
   	}                            
     
     if(!hasCulled) {
     	hasCulled = true;          
-      setTimeout( function(){    
-      	cullPlayers(instance);
+      setTimeout( function(){ 
+      	cullPlayers(instance, room);
       }, 2000);
     }
 
@@ -80,8 +89,7 @@ exports.handler = function( socket ) {
   	instance.playerList[name] = true;
   });
 
-  var cullPlayers = function( instance ) {
-    var hasPlayers = false;  
+  var cullPlayers = function( instance, room ) { 
     for(var i in instance.playerList) {   
       if(instance.playerList[i] === true) { 
       	instance.playerList[i] = i;
@@ -92,10 +100,8 @@ exports.handler = function( socket ) {
   	    }                               
       }                                
     }
+  
     hasCulled = false;
-    if(!hasPlayers) {
-      util('nukeRoom', instance);
-    } 
   };
  
  socket.on('firing', function( x, y, direction, animation, gamename ) {
@@ -157,7 +163,7 @@ exports.handler = function( socket ) {
    if(hasCalled) {
      hasCalled = false; 
      setTimeout(function() {
-       var chosen = util(entity[instance]);
+       var chosen = util('resync', entity[instance]);
        for(var i in instance.socketid) {  
         io.sockets.socket(instance.socketid[i]).emit('sync', chosen);
        };
@@ -168,8 +174,13 @@ exports.handler = function( socket ) {
 
  });
 
- socket.on('syncReq', function() {
-   
- });
+ };
 
- } 
+
+ exports.sync = function( self ) { 
+   io.sockets.emit('syncCall');
+   var that = self; // I don't even...
+   setTimeout( function() {
+     self(that);
+   } ,10000)
+ }; 

@@ -9,6 +9,9 @@ How do I resync? Take a snapshot of the game at a random interval, and ask all c
 
 ToDo: 
 [] Finish utilities
+   [x] Should nuke a room
+   [] Should properly spawn mobs
+   [] Should properly record health etc. 
 [] Clear up player movement
 [] Utilize cookies
    [] Players should be spawned based on what the cookie says

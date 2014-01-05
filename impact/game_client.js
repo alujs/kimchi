@@ -9,22 +9,24 @@ socket.emit('zombie', 'render', {room: room_name});
 socket.emit('account', instance_name, room_name);
 
 
-socket.on('addPlayer', function( list, name ) { // This adds a player, really primitive REALLY 
-	console.log("Initializing " + name)			// needs to be refactored. 
+socket.on('addPlayer', function( list, name ) { 
+	console.log("Initializing " + name)			 
 	console.log(list)
-	for(var i in list) {						// So much damn work. So many small details...
+	for(var i in list) {						
 		if(list[i] !== instance_name) {
 			ig.game.spawnEntity(EntityOtherPlayer, 160, 240, {gamename:list[i]});
 		}
 	}
 });
 
-socket.on('moveplayer', function( x, y, animation, client_name ) {
+socket.on('moveplayer', function( x, y, animation, client_name, velx, vely ) {
 	var playermove = ig.game.getEntitiesByType(EntityOtherPlayer); 
 	for(var i = 0; i < playermove.length; i++) {
 		if(playermove[i].gamename === client_name) {
-			playermove[i].vel.x = x;
-			playermove[i].vel.y = y; 
+			playermove[i].movex = velx;
+			playermove[i].pos.x = x;
+			playermove[i].movey = vely;
+			playermove[i].pos.y = y;  
 			playermove[i].animation = animation;
 			return;
 		}
