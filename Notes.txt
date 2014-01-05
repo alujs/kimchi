@@ -7,7 +7,12 @@ AI must behave deterministically.
 
 How do I resync? Take a snapshot of the game at a random interval, and ask all clients to resync 
 
-
+ToDo: 
+[] Finish utilities
+[] Clear up player movement
+[] Utilize cookies
+   [] Players should be spawned based on what the cookie says
+[]
 
 var resync = function() {
 	// randomly selects two clients that aren't being culled

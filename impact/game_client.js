@@ -1,12 +1,10 @@
 var socket = io.connect();
-var instance_name = prompt("Player Name"); // I suggest Admin. 
-var room_name = "Room1"; // For now everyone is going to be stuck in room1, I have the 
-						// option to make it multiple instances but for testing/firebase
-						// it's simply easier
-						// The next big step is to use cookies so I don't have a pop up prompt.
+var instance_name = prompt("Player Name"); 
+var room_name = "Room1"; 
+
 socket.emit('room', room_name, instance_name);
-	// Remember those variable initializer we had in game_server? These three, room/zombie/account
-socket.emit('zombie', 'render', {room: room_name}); // all do that
+	
+socket.emit('zombie', 'render', {room: room_name}); 
 
 socket.emit('account', instance_name, room_name);
 
@@ -21,14 +19,12 @@ socket.on('addPlayer', function( list, name ) { // This adds a player, really pr
 	}
 });
 
-socket.on('moveplayer', function( x, y, animation, client_name ) { // Needs to be refactored to
-																// use predictive movement 
-	var playermove = ig.game.getEntitiesByType(EntityOtherPlayer); // and velocity
-																// btw Let me deal with this..
+socket.on('moveplayer', function( x, y, animation, client_name ) {
+	var playermove = ig.game.getEntitiesByType(EntityOtherPlayer); 
 	for(var i = 0; i < playermove.length; i++) {
 		if(playermove[i].gamename === client_name) {
-			playermove[i].pos.x = x;
-			playermove[i].pos.y = y; 
+			playermove[i].vel.x = x;
+			playermove[i].vel.y = y; 
 			playermove[i].animation = animation;
 			return;
 		}
@@ -36,14 +32,14 @@ socket.on('moveplayer', function( x, y, animation, client_name ) { // Needs to b
 });
 
 
-socket.on('rollcall', function() { // For culling. If you don't reply with a salute you get culled. 
+socket.on('rollcall', function() { 
 	socket.emit( 'salute', instance_name, room_name);
 });
 
-socket.on('deletePlayer', function( name ) { // Cull from server results in this.
+socket.on('deletePlayer', function( name ) { 
 	console.log("Received")
   var deleteTarget = ig.game.getEntitiesByType(EntityOtherPlayer);
-  for(var i = 0; i < deleteTarget.length; i++) { // is this a DOM manipulation? if so , we should cache the length
+  for(var i = 0; i < deleteTarget.length; i++) { 
     if(deleteTarget[i].gamename === name) {
       deleteTarget[i].kill();
     }
@@ -52,25 +48,26 @@ socket.on('deletePlayer', function( name ) { // Cull from server results in this
   }
 });
 
-socket.on('spawnbullet', function( x, y, obj) { // When designing things keep original functionality
-											   // initialize through settings or the third argument. 
-	ig.game.spawnEntity(EntityProjectile, x, y, obj); // that costed me a lot of pain =( 
+socket.on('spawnbullet', function( x, y, obj) { 
+	ig.game.spawnEntity(EntityProjectile, x, y, obj); 
 });
 
-// socket.on('spawnzombie', function( x, y, settings ) {
-// 	ig.game.spawnEntity(EntityEnemy, x, y, settings);
-// });
 
-socket.on('movezombie', function( x, y, animation, id) { // Totally irrelevant and not used. 
-  var zombies = ig.game.getEntitiesByType(EntityEnemy); // Zombie movement on server side is too costly
-  for(var i = 0; i < zombies.length; i++) { // So I have to modify the AI . It sucks but I discovere dit the hard way.
-  	if(zombies[i].tag === id) {
-	  	zombies[i].vel.x = x;
-	  	zombies[i].vel.y = y; 
-	  	zombies[i].animation = animation;
-	  	return; 
-    }
+socket.on('sync', function( entArr ) { // now is resync 
+  var tag;
+  var zombies = ig.game.getEntitiesByType(EntityEnemy); 
+  for(var i = 0; i < zombies.length; i++) { 
+    tag = zombies[i].tag;
+  	zombies[i].pos.x = entArr[tag].pos.x;
+  	zombies[i].pos.y = entArr[tag].pos.y; 
+  	zombies[i].animation = entArr[tag].pos.animation;
+  	return; 
   }
+});
+
+socket.on('syncCall', function() { // receives a sync request and answers it with entities
+  var myEntities = ig.game.getEntitiesByType(EntityEnemy); 
+  socket.emit('myData', myEntities); 
 });
 
 socket.on('zrender', function( arr ) { // Renders the zombies. 
@@ -80,7 +77,5 @@ socket.on('zrender', function( arr ) { // Renders the zombies.
 	}
 });
 
-socket.on('terminate', function( identity ) { // Culls the zombies. Eventually.
-											// not functional obviously :( 
-												// I made small mods to enemy/player/and projectile. 
-});											// I will start with projectile. 
+socket.on('terminate', function( identity ) { 
+});

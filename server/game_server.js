@@ -12,7 +12,7 @@ var base = {};
 var name_base = {};   
 var scores = {}; 
 var seed = {};
-
+var entity = {};
 
 
 exports.setIO = function( obj ) { // 
@@ -94,7 +94,7 @@ exports.handler = function( socket ) {
     }
     hasCulled = false;
     if(!hasPlayers) {
-      util('nukeRoom', instance)
+      util('nukeRoom', instance);
     } 
   };
  
@@ -107,10 +107,10 @@ exports.handler = function( socket ) {
   });
 
 
- socket.on('zombie', function( type, obj ) {// This messed up code is going to be weird to read
-    var instance = ids[socket.id];   // Basically all this is just fancy routing 
-        instance = rooms[instance];  // which makes the code more modular but in this case impossible to read
-    if(base[obj.room] === undefined) { // So that's like -100 pts. 
+ socket.on('zombie', function( type, obj ) {
+    var instance = ids[socket.id];   
+        instance = rooms[instance];  
+    if(base[obj.room] === undefined) { 
       base[obj.room] = new db("https://hrproj.firebaseio.com/Rooms/" + obj.room + "/Zombies");
       zomb.ai['spawner'](base[obj.room]); 
     }
@@ -141,5 +141,16 @@ exports.handler = function( socket ) {
     name_base[kb].child('kills').set( scores[instance].name[kb].kills );
     name_base[kb].child('score').set( scores[instance].name[kb].score );
  });
- // write a syncing function; a BIG to-DO next to refining the AI. 
+
+
+ socket.on('myData', function( data ) {
+   var instance = ids[socket.id];  
+       instance = rooms[instance];
+   var chosen = util(data);
+    for(var i in instance.socketid) {  
+      io.sockets.socket(instance.socketid[i]).emit('sync', chosen);
+    }  
+ });
+
+ socket.on('')
  } 

@@ -3,24 +3,16 @@ var db = require('firebase');
 module.exports = function( type, args ) { 
 	var ut = {};
 
-	ut.resync = function() {
-	  
+	ut.resync = function( arr ) { // room and list of entities
+	  var bound = arr.length; 
+		var selection = Math.floor(Math.random()*bound);
+	  return syncArray[selection];
   };
 
-	ut.seeds = function() {
-		// takes a bunch of random values
-		// seeds an array and sends it to the AI , the AI then uses the array
-		// all new things will be initialized using that array. 
-		// feeds it into the client
-	   // everything is done in order
-	   
-	};
 
 	ut.nukeRoom = function( room ) {
 		var target =  new db('https://hrproj.firebaseio.com/' + room);
 		target.remove();
-		// if a room has zero users, write the scores to the profile
-	    // drop the room from database
 	};
 
 	ut.gameOver = function() {
@@ -35,5 +27,5 @@ module.exports = function( type, args ) {
 
 
 
-  utilities[type](args);   
+  ut[type](args);   
 }
