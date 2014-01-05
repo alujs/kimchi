@@ -153,7 +153,7 @@ ig.module (
         this.canShoot = false;
       }
       if (this.netTimer < 1) {
-        this.netTimer = 5;
+        this.netTimer = 10;
         socket.emit('updatemove', this.pos.x, this.pos.y, this.currentAnimation, this.gamename);
       }
       this.netTimer = this.netTimer - 1;

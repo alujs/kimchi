@@ -79,3 +79,4 @@ socket.on('zrender', function( arr ) { // Renders the zombies.
 
 socket.on('terminate', function( identity ) { 
 });
+

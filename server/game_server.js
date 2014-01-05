@@ -146,11 +146,30 @@ exports.handler = function( socket ) {
  socket.on('myData', function( data ) {
    var instance = ids[socket.id];  
        instance = rooms[instance];
-   var chosen = util(data);
-    for(var i in instance.socketid) {  
-      io.sockets.socket(instance.socketid[i]).emit('sync', chosen);
-    }  
+
+   if(entity[instance] === undefined) {
+     entity[instance] = [];
+     entity[instance].push(data);
+   } else {
+     entity[instance].push(data);
+   }
+
+   if(hasCalled) {
+     hasCalled = false; 
+     setTimeout(function() {
+       var chosen = util(entity[instance]);
+       for(var i in instance.socketid) {  
+        io.sockets.socket(instance.socketid[i]).emit('sync', chosen);
+       };
+       hasCalled = true;
+       entity[instance] = [];  
+     }, 1000);
+   }
+
  });
 
- socket.on('')
+ socket.on('syncReq', function() {
+   
+ });
+
  } 
