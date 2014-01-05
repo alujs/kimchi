@@ -11,13 +11,13 @@ var server = require('http').createServer(app)
 app.configure(function(){
   app.use(express.methodOverride());
   app.use(express.bodyParser());
-  //app.use(app.router);
+ 
 });
 
-// This
+
 app.use(express.static(__dirname));
 
-app.use('/signin', function( req, res, next ) { // <-- Log in with Admin/Admin or skip straight to /imapct/index.html
+app.use('/signin', function( req, res, next ) { 
   var user = req.body.user;
   var pw = req.body.pw;
 
@@ -32,9 +32,7 @@ app.use('/signin', function( req, res, next ) { // <-- Log in with Admin/Admin o
      }
   });
 
-  
-  // next();
-  // for testing uncomment out line 38 and comment out all the fb crap. 
+
 });
 
 app.use(function( req, res, next ) {
@@ -46,6 +44,6 @@ app.use(function( req, res, next ) {
 server.listen(port);
 
 game.setIO(io);
-io.sockets.on('connection', game.handler);  // <-- The real meat of the server, refer to game_server.js 
+io.sockets.on('connection', game.handler); 
 
 console.log('app listening on port', port);

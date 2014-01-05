@@ -1,0 +1,44 @@
+How can I fix the AI? 
+
+
+Periodically get three seed values and put that in for the determine? 
+
+AI must behave deterministically.
+
+How do I resync? Take a snapshot of the game at a random interval, and ask all clients to resync 
+
+
+
+var resync = function() {
+	// randomly selects two clients that aren't being culled
+	// Asks them for an array of their entities. 
+	// chooses one of them as the game state 
+	// sends a signal to all zombies to resync. 
+};
+
+
+
+var seeds = function() {
+	// takes a bunch of random values
+	// seeds an array and sends it to the AI , the AI then uses the array
+	// all new things will be initialized using that array. 
+	// feeds it into the client
+   // everything is done in order
+  
+};
+
+
+var nukeRoom = function() {
+	// if a room has zero users, write the scores to the profile
+    // drop the room from database
+};
+
+var gameOver = function() {
+	// Check to see if all the players are dead
+	// redirect page or show a pop up
+	// call nukeRoom 
+};
+
+var killPlayer = function() {
+	
+};
