@@ -28,7 +28,9 @@ socket.on('root', function() {
 });
 
 socket.on('snapShot', function() { // I should just use _.extend ;_;
+  console.log("Got a ping.")
   if(stat === false) {
+  	console.log("I am new so no snapshot!")
   	return;
   }
   console.log("Old players are now uploading")
@@ -63,7 +65,7 @@ socket.on('snapShot', function() { // I should just use _.extend ;_;
 });
 
 socket.on('staged', function() {
-	
+	console.log("I hear something")
   if(stat === false) {
   	console.log("I am new so I should get this message")
   	socket.emit('ready');

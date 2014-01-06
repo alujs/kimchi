@@ -89,13 +89,14 @@ exports.handler = function( socket ) {
        snapshot[room].mobs[z].type = obj.mobs[z].type;
     }
     
-    for(var i in instance.socketid) { 
-       io.sockets.socket(instance.socketid[i]).emit('staged');
+    for(var k in instance.socketid) { 
+       io.sockets.socket(instance.socketid[k]).emit('staged');
     }
   });
 
  socket.on('ready', function() {
    var room = ids[socket.id];
+   snapshot[room].req = 0;
    io.sockets.socket(socket.id).emit('draw', snapshot[room]);
  });
   

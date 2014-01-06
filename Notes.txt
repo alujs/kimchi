@@ -18,7 +18,8 @@ ToDo:
    [] Need to spawn according to server Instructions
 [] Utilize cookies
    [] Players should be spawned based on what the cookie says
-[]
+[] Resyncing
+   [] Should resync
 
 var resync = function() {
 	// randomly selects two clients that aren't being culled
