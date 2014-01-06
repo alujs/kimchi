@@ -1,7 +1,7 @@
 var socket = io.connect();
 var instance_name = prompt("Player Name"); 
 var room_name = "Room1"; 
-var status = 'uninitialized';
+var stat = false;
 
 socket.emit('room', room_name, instance_name);
 	
@@ -21,7 +21,77 @@ socket.on('addPlayer', function( list, name, coords ) {
 	}
 });
 
-socket.emit('zombie', 'render', {room: room_name}); 
+socket.on('root', function() {
+  console.log("The player that initializes the room should spawn these.")
+  socket.emit('zombie', 'render', {room: room_name});
+  stat = true;  	
+});
+
+socket.on('snapShot', function() { // I should just use _.extend ;_;
+  if(stat === false) {
+  	return;
+  }
+  console.log("Old players are now uploading")
+  var results = {};
+      results.players = {};
+      results.mobs = {};
+  var players = ig.game.getEntitiesByType(EntityOtherPlayer);
+  var client = ig.game.getEntitiesByType(EntityPlayer);
+  // I suspect we'll get more than one.. due to child references. 
+  var mobs_a = ig.game.getEntitiesByType(EntityEnemy); // Need ot consolidate this if I can use child references.
+  var mobs_b = ig.game.getEntitiesByType(EntityEnemy2);
+
+      players = players.concat(client);
+      mobs_a = mobs_a.concat(mobs_b);
+
+  for(var i = 0; i < players.length; i++) {
+    results.players[i] = {};
+    results.players[i].tag = players[i].gamename;
+    results.players[i].x = players[i].pos.x;
+    results.players[i].y = players[i].pos.y; 
+  };
+
+  for(var x = 0; x < mobs_a.length; x++) {
+  	results.mobs[x] = {};
+  	results.mobs[x].tag = mobs_a[x].tag;
+  	results.mobs[x].x = mobs_a[x].pos.x;
+  	results.mobs[x].y = mobs_a[x].pos.y;
+  	results.mobs[x].type = mobs_a[x].type; 
+  }
+  console.log(results)
+  socket.emit('snapReply', results)
+});
+
+socket.on('staged', function() {
+	
+  if(stat === false) {
+  	console.log("I am new so I should get this message")
+  	socket.emit('ready');
+  }
+
+});
+
+socket.on('draw', function( snapshot ) {
+  console.log("I am ready to draw but are these .. functions valid?")
+  console.log(snapshot);
+  var mobs = snapshot.mobs;
+  var players = snapshot.players; 
+  var m_type;
+  for(var i in mobs) { 
+  	if(mobs[i].type === 'basic') {
+  	  m_type = EntityEnemy;
+  	} else {
+  	  m_type = EntityEnemy2;
+  	};
+  	ig.game.spawnEntity(m_type, mobs[i].x, mobs[i].y, {tag: mobs[i].tag});
+  }
+  for(var x in players) {
+  	ig.game.spawnEntity(EntityOtherPlayer, players[x].x, players[x].y, {gamename: players[x].tag})
+  }
+	stat = true;
+});
+
+
 
 socket.on('moveplayer', function( x, y, animation, client_name) {
 	var playermove = ig.game.getEntitiesByType(EntityOtherPlayer); 

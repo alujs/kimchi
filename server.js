@@ -46,6 +46,6 @@ server.listen(port);
 game.setIO(io);
 io.sockets.on('connection', game.handler); 
 
-game.sync(game.sync);
+// game.sync(game.sync);
 
 console.log('app listening on port', port);

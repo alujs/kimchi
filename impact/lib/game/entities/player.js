@@ -24,7 +24,7 @@ ig.module (
     health: 200,
     currentAnimation: '', // This is the biggest change here, I use a hash/object for animations
     checkAgainst: ig.Entity.TYPE.B, // We really don't need giant switch statements =( 
-    collides: ig.Entity.COLLIDES.PASSIVE,
+    collides: ig.Entity.COLLIDES.ACTIVE,
     canShoot: false,
     fireCooldown: new ig.Timer(),
     healthRegenerateTimer: new ig.Timer(0.5),
@@ -179,11 +179,11 @@ ig.module (
   EntityOtherPlayer = ig.Entity.extend({
     size: {x: 22, y: 37},
     type: ig.Entity.TYPE.A, // Since we used the tutorial code this TYPE A was a TYPE B
-    name: 'otherplayer', // and kept killing players and despawning them haha
+    name: 'player', // and kept killing players and despawning them haha
     gamename: '',   // It took me forever to figure out why my character was despawning when I was shooting with  an ally
     animation: 'idle', // Small shit man, small shit that gets you =( 
     speed: 100, 
-    collides: ig.Entity.COLLIDES.PASSIVE,
+    collides: ig.Entity.COLLIDES.ACTIVE,
     direction: 0,
     movementSpeed: 100,
     state: 'idle',

@@ -51,7 +51,8 @@ exports.handler = function( socket ) {
         instance = rooms[instance];
     var room = ids[socket.id];
     if(snapshot[room].init === true) {
-      snapshot[room].init = false; 
+      snapshot[room].init = false;
+      io.sockets.socket(socket.id).emit('root');
       return;
     }
     for(var i in instance.socketid) {
@@ -74,34 +75,40 @@ exports.handler = function( socket ) {
     snapshot[room].req = 1; 
 
     for(var i in obj.players) {
-       snapshot[room].players[obj.players[i].instance] = {};
-       snapshot[room].players[obj.players[i].instance].x = obj.players[i].x;
-       snapshot[room].players[obj.players[i].instance].y = obj.players[i].y;
-       snapshot[room].players[obj.players[i].instance].tag = obj.players[i].instance;
+       snapshot[room].players[i] = {};
+       snapshot[room].players[i].x = obj.players[i].x;
+       snapshot[room].players[i].y = obj.players[i].y;
+       snapshot[room].players[i].tag = obj.players[i].tag;
     }
 
-    for(var i in obj.zombies) {
-       snapshot[room].mobs[obj.zombies[i].instance] = {};
-       snapshot[room].mobs[obj.zombies[i].instance].x = obj.zombies[i].x; 
-       snapshot[room].mobs[obj.zombies[i].instance].y = obj.zombies[i].y;
-       snapshot[room].mobs[obj.zombies[i].instance].tag = obj.zombies[i].tag;
-       snapshot[room].mobs[obj.zombies[i].instance].type = obj.zombies[i].type;
+    for(var z in obj.mobs) {
+       snapshot[room].mobs[z] = {};
+       snapshot[room].mobs[z].x = obj.mobs[z].x; 
+       snapshot[room].mobs[z].y = obj.mobs[z].y;
+       snapshot[room].mobs[z].tag = obj.mobs[z].tag;
+       snapshot[room].mobs[z].type = obj.mobs[z].type;
     }
+    
     for(var i in instance.socketid) { 
        io.sockets.socket(instance.socketid[i]).emit('staged');
     }
   });
 
  socket.on('ready', function() {
-   var instance = ids[socket.id];
-       instance = rooms[instance];
    var room = ids[socket.id];
    io.sockets.socket(socket.id).emit('draw', snapshot[room]);
  });
   
+ socket.on('insertPlayer', function() {
+   var instance = ids[socket.id];
+       instance = rooms[instance];
 
+    for(var i in instance.socketid) { 
+      io.sockets.socket(instance.socketid[i]).emit('addPlayer', instance.playerList);
+    }
+ });
 
-  socket.on('updatemove', function( x, y, animation, client_name, velx, vely ) { // eventually store and do checking before broadcasting
+  socket.on('updatemove', function( x, y, animation, client_name) { // eventually store and do checking before broadcasting
   	var instance = ids[socket.id];
         instance = rooms[instance];
 
