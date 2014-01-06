@@ -5,7 +5,7 @@ var io = require('socket.io'), // refactor this entire thing to use Socket.io ro
   pl = require('./helpers/player.js'),
   util = require('./helpers/utilities.js');
   
-
+var snapshot = {};
 var rooms = {};  
 var ids = {};   
 var base = {}; 
@@ -24,7 +24,12 @@ exports.setIO = function( obj ) { //
 exports.handler = function( socket ) {
 
   socket.on('room', function( room, instance_name ) { 
-  	if(rooms[room] === undefined) { 
+  	if(rooms[room] === undefined) {
+      snapshot[room] = {};
+      snapshot[room].players = {};
+      snapshot[room].mobs = {};
+      snapshot[room].req = 0;
+      snapshot[room].init = true; 
   		rooms[room] = {};            
   		rooms[room].playerList = {}; 
   		rooms[room].socketid = {};
@@ -36,6 +41,7 @@ exports.handler = function( socket ) {
       rooms[room].socketid[socket.id] = socket.id;
       rooms[room].playerCount += 1;
   	}
+    console.log(rooms[room].playerCount)
   	ids[socket.id] = room; // A bit on Socket io. Each client has a unique socket id that is 'permanent'
   });                     
 
@@ -43,30 +49,80 @@ exports.handler = function( socket ) {
   	console.log("Initializing  " + name + " with ID of " + socket.id);
     var instance = ids[socket.id];
         instance = rooms[instance];
-    
-    for(var i in instance.socketid) { 
-  	  io.sockets.socket(instance.socketid[i]).emit('addPlayer', instance.playerList, name);
-  	}
+    var room = ids[socket.id];
+    if(snapshot[room].init === true) {
+      snapshot[room].init = false; 
+      return;
+    }
+    for(var i in instance.socketid) {
+      io.sockets.socket(instance.socketid[i]).emit('snapShot');
+    }
   });
+
+  socket.on('snapReply', function( obj ) { // need a mutex?
+    if(obj === undefined) {
+      return; 
+    }
+
+    var instance = ids[socket.id];
+        instance = rooms[instance];
+    var room = ids[socket.id];
+
+    if(snapshot[room].req !== 0) { // Prevents multiple returns... sort of .
+      return; 
+    } 
+    snapshot[room].req = 1; 
+
+    for(var i in obj.players) {
+       snapshot[room].players[obj.players[i].instance] = {};
+       snapshot[room].players[obj.players[i].instance].x = obj.players[i].x;
+       snapshot[room].players[obj.players[i].instance].y = obj.players[i].y;
+       snapshot[room].players[obj.players[i].instance].tag = obj.players[i].instance;
+    }
+
+    for(var i in obj.zombies) {
+       snapshot[room].mobs[obj.zombies[i].instance] = {};
+       snapshot[room].mobs[obj.zombies[i].instance].x = obj.zombies[i].x; 
+       snapshot[room].mobs[obj.zombies[i].instance].y = obj.zombies[i].y;
+       snapshot[room].mobs[obj.zombies[i].instance].tag = obj.zombies[i].tag;
+       snapshot[room].mobs[obj.zombies[i].instance].type = obj.zombies[i].type;
+    }
+    for(var i in instance.socketid) { 
+       io.sockets.socket(instance.socketid[i]).emit('staged');
+    }
+  });
+
+ socket.on('ready', function() {
+   var instance = ids[socket.id];
+       instance = rooms[instance];
+   var room = ids[socket.id];
+   io.sockets.socket(socket.id).emit('draw', snapshot[room]);
+ });
+  
+
 
   socket.on('updatemove', function( x, y, animation, client_name, velx, vely ) { // eventually store and do checking before broadcasting
   	var instance = ids[socket.id];
         instance = rooms[instance];
 
     for(var i in instance.socketid) { // My next refactoring will be to use velocity rather than x/y
-  	  io.sockets.socket(instance.socketid[i]).emit('moveplayer', x, y, animation, client_name, velx, vely);
+  	  io.sockets.socket(instance.socketid[i]).emit('moveplayer', x, y, animation, client_name);
   	}                                
   });
 
   socket.on('disconnect', function() { 
   	var instance = ids[socket.id];
         instance = rooms[instance];
-    var counter = instance.playerCount;
+    
     var room = ids[socket.id];   
-    console.log("A client has disconnected from an instance:  " + instance)
-    counter -= 1; 
-    if(counter === 0) {
-      return util('nukeRoom', room);
+    console.log("A client has disconnected from an instance:  " + room)
+    instance.playerCount -= 1;  
+    
+    if(instance.playerCount === 0) {
+      console.log("Nuking ze room: " + room)
+      util('nukeRoom', room);
+      snapshot[room] === undefined; 
+      return;
     }
 
     for(var i in instance.socketid) {

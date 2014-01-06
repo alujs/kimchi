@@ -9,7 +9,7 @@ ig.module( // move this to back end later.  LOL NOPE.
       this.entity = entity;
       this.attackTimer = new ig.Timer(2);
     },
-    doAction: function(action) { // Scroll to the decision thing. 
+    doAction: function(action) { 
     	this.lastAction = action;
     	return action;
     },
@@ -43,12 +43,6 @@ ig.module( // move this to back end later.  LOL NOPE.
           this.attackTimer.set(2);
           return this.doAction(ig.ai.ACTION.Attack);
          }
-        // var decide = Math.random(); // <--- THIS SHIT SIR. THIIIS SHIT is funny because 
-        // console.log('decide', decide); // If you think about it.. it presents a very difficult challenge for me
-        // if (decide < 0.02) { // Since I can't put the AI on the server due to performance issues..
-        //   return this.doAction(ig.ai.ACTION.Attack); // Each client has to manage AI.. but if each one has a random(); to it..
-        // }                               // It makes syncing up an issue. We should figure out a way around this. 
-        // return this.doAction(ig.ai.ACTION.Rest); // I am running on zero hours of sleep so.. =( )
       }
       if (distance > 30 && distance < 4000) {
         if (Math.abs(angle) < Math.PI / 4) {

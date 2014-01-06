@@ -1,33 +1,35 @@
 var socket = io.connect();
 var instance_name = prompt("Player Name"); 
 var room_name = "Room1"; 
+var status = 'uninitialized';
 
 socket.emit('room', room_name, instance_name);
 	
-socket.emit('zombie', 'render', {room: room_name}); 
-
 socket.emit('account', instance_name, room_name);
 
 
-socket.on('addPlayer', function( list, name ) { 
+socket.on('addPlayer', function( list, name, coords ) { 
 	console.log("Initializing " + name)			 
-	console.log(list)
+	
 	for(var i in list) {						
 		if(list[i] !== instance_name) {
-			ig.game.spawnEntity(EntityOtherPlayer, 160, 240, {gamename:list[i]});
+			var temp = '' + list[i];
+			    temp = {gamename: list[i]};
+			console.log(temp)
+			ig.game.spawnEntity(EntityOtherPlayer, 1178, 861, temp);
 		}
 	}
 });
 
-socket.on('moveplayer', function( x, y, animation, client_name, velx, vely ) {
+socket.emit('zombie', 'render', {room: room_name}); 
+
+socket.on('moveplayer', function( x, y, animation, client_name) {
 	var playermove = ig.game.getEntitiesByType(EntityOtherPlayer); 
 	for(var i = 0; i < playermove.length; i++) {
-		if(playermove[i].gamename === client_name) {
-			playermove[i].movex = velx;
+		if(playermove[i].gamename === client_name) { 
+			playermove[i].state = animation; 
 			playermove[i].pos.x = x;
-			playermove[i].movey = vely;
-			playermove[i].pos.y = y;  
-			playermove[i].animation = animation;
+			playermove[i].pos.y = y; 
 			return;
 		}
 	}
@@ -79,6 +81,6 @@ socket.on('zrender', function( arr ) { // Renders the zombies.
 	}
 });
 
-socket.on('terminate', function( identity ) { 
-});
+// socket.on('terminate', function( identity ) { 
+// });
 

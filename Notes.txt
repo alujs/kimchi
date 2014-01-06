@@ -13,6 +13,9 @@ ToDo:
    [] Should properly spawn mobs
    [] Should properly record health etc. 
 [] Clear up player movement
+   [x] Has smoother animations
+   [] Needs a bit more clean up 
+   [] Need to spawn according to server Instructions
 [] Utilize cookies
    [] Players should be spawned based on what the cookie says
 []

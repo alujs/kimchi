@@ -24,7 +24,7 @@ ig.module (
     health: 200,
     currentAnimation: '', // This is the biggest change here, I use a hash/object for animations
     checkAgainst: ig.Entity.TYPE.B, // We really don't need giant switch statements =( 
-    collides: ig.Entity.COLLIDES.ACTIVE,
+    collides: ig.Entity.COLLIDES.PASSIVE,
     canShoot: false,
     fireCooldown: new ig.Timer(),
     healthRegenerateTimer: new ig.Timer(0.5),
@@ -58,6 +58,7 @@ ig.module (
   	},
 
   	update: function() {
+      
       if (!ig.input.state('fire')) {
         this.speed = 100;
       }
@@ -153,8 +154,9 @@ ig.module (
         this.canShoot = false;
       }
       if (this.netTimer < 1) {
-        this.netTimer = 20;
-        socket.emit('updatemove', this.pos.x, this.pos.y, this.currentAnimation, this.gamename, this.vel.x, this.vel.y);
+        this.netTimer = 7;
+        //socket.emit('updatemove', this.pos.x, this.pos.y, this.currentAnimation, this.gamename, this.vel.x, this.vel.y);
+        socket.emit('updatemove', this.pos.x, this.pos.y, this.currentAnimation, this.gamename)
       }
       this.netTimer = this.netTimer - 1;
       if (this.health < 200) {
@@ -179,18 +181,17 @@ ig.module (
     type: ig.Entity.TYPE.A, // Since we used the tutorial code this TYPE A was a TYPE B
     name: 'otherplayer', // and kept killing players and despawning them haha
     gamename: '',   // It took me forever to figure out why my character was despawning when I was shooting with  an ally
-    animation: 'idledown', // Small shit man, small shit that gets you =( 
-    destinationx: 99999999,
-    destinationy: 99999999,
-    movey: 0,
-    movex: 0,
+    animation: 'idle', // Small shit man, small shit that gets you =( 
+    speed: 100, 
     collides: ig.Entity.COLLIDES.PASSIVE,
     direction: 0,
+    movementSpeed: 100,
+    state: 'idle',
     
     animSheet: new ig.AnimationSheet ('media/main1.png', 48, 48),
 
     init: function(x, y, settings) {
-
+      this.parent(x, y, settings);
       this.addAnim('up', 0.21, [9, 10, 11]);
       this.addAnim('down', 0.21, [0, 1, 2]);
       this.addAnim('left', 0.21, [3, 4, 5]);
@@ -207,16 +208,50 @@ ig.module (
       this.addAnim('fireidleleft', 0.05, [16, 4, 16, 4, 19, 4, 19, 4, 16, 4, 16, 4]);
       //this.addAnim('fireup', 0.01, [9,9,9,9,10,10,10,10,11,11,11,11]);
       this.addAnim('fireidleup', 0.05, [10]);
-      this.currentAnim = this.anims.idledown;
-
-      this.parent(x, y, settings);
-
     },
    
     update: function() {
-      this.currentAnim = this.anims[this.animation]; // So delicious. 
-      this.vel.x = this.movex;
-      this.vel.y = this.movey;
+      this.parent();
+      //this.currentAnim = this.anims[this.animation]; // So delicious. 
+      if (this.state !== 'fire') {
+        this.speed = 100;
+      }
+      if (this.state === 'left' /*&& ismove != 1 && ismove != 2 && ismove != 4*/) {
+        this.vel.x = -this.speed;
+        //ismove = 3;
+        this.direction = 3;
+        if (this.state !=='fire') {
+          this.currentAnim = this.anims.left;
+        }
+      } else if (this.state === 'right' /*&& ismove != 1 && ismove != 3 && ismove != 4*/) {
+        this.vel.x = this.speed;
+        //ismove = 2;
+        
+        this.direction = 2;
+        if (this.state !== 'fire') {
+          this.currentAnim = this.anims.right;
+        }
+      } else if ( this.state === 'up' /* && ismove != 2 && ismove != 3 && ismove != 4*/) {
+        this.vel.y = -this.speed;
+        //ismove = 1;
+        this.direction = 1;
+        if (this.state !== 'fire') {
+          this.currentAnim = this.anims.up;
+        }
+      } else if (this.state === 'down' /* && ismove != 2 && ismove != 3 && ismove != 1*/) {
+        this.vel.y = +this.speed;
+        //ismove = 4;
+        this.direction = 4;
+        if (this.state !== 'fire') {
+          this.currentAnim = this.anims.down;
+        }
+      } else {
+        this.vel.x = 0;
+        this.vel.y = 0;
+        this.currentAnim = this.anims.idledown;
+      }
+
+      
     }
 
 

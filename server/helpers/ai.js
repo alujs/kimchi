@@ -3,13 +3,17 @@ var trigger = false;
 exports.ai = {
 
    'render': function( client, fb) {
-      console.log("Render Should only happen once");
+      
    	  var z_sum = [];
       fb.on('value', function( data ) {
           var result = data.val();
        //  var dat = data.val();
       	// var z_sum = {x: dat.x, y: dat.x, settings:{ tag: dat.tag, animation: dat.animation}};
-        client.emit('zrender', result);		
+        if(!trigger) {
+          console.log("Render Should only happen once");
+          client.emit('zrender', result);
+          trigger = true;
+        }		
       });
    },
 
@@ -23,7 +27,7 @@ exports.ai = {
              health: 500,
              settings: {tag: i}
            });
-         }
+         } 
        }
    }
 }
