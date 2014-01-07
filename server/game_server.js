@@ -189,6 +189,13 @@ exports.handler = function( socket ) {
     }
  });
 
+ socket.on('mob_death', function( obj ) {
+   var instance = ids[socket.id];
+       instance = rooms[instance];
+    for(var i in instance.socketid) {
+      io.sockets.socket(instance.socket[i]).emit('kill_mob', obj);
+    }
+ });
 
  socket.on('account', function( name, room ) {
    name_base[name] = new db('https://hrproj.firebaseio.com/Rooms/' + room + "/Users/" + name + "/");

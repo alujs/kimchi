@@ -11,7 +11,7 @@ ig.module(
     collides: ig.Entity.COLLIDES.ACTIVE,
     type: ig.Entity.TYPE.B,
     checkAgainst: ig.Entity.TYPE.A,
-    type: 'basic',
+    mob: 'basic',
     animation: '',
     health: 500,
     pts: 100,

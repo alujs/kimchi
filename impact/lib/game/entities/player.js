@@ -156,7 +156,7 @@ ig.module (
       if (this.netTimer < 1) {
         this.netTimer = 7;
         //socket.emit('updatemove', this.pos.x, this.pos.y, this.currentAnimation, this.gamename, this.vel.x, this.vel.y);
-        //socket.emit('updatemove', this.pos.x, this.pos.y, this.currentAnimation, this.gamename)
+        socket.emit('updatemove', this.pos.x, this.pos.y, this.currentAnimation, this.gamename)
       }
       this.netTimer = this.netTimer - 1;
       if (this.health < 200) {

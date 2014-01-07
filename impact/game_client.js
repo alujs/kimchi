@@ -10,7 +10,10 @@ socket.emit('account', instance_name, room_name);
 
 socket.on('addPlayer', function( list, name, coords ) { 
 	console.log("Initializing " + name)			 
-	
+	if(stat === false ) {
+    stat = true;
+    return; 
+  }
 	for(var i in list) {						
 		if(list[i] !== instance_name) {
 			var temp = '' + list[i];
@@ -58,7 +61,7 @@ socket.on('snapShot', function() { // I should just use _.extend ;_;
   	results.mobs[x].tag = mobs_a[x].tag;
   	results.mobs[x].x = mobs_a[x].pos.x;
   	results.mobs[x].y = mobs_a[x].pos.y;
-  	results.mobs[x].type = mobs_a[x].type; 
+  	results.mobs[x].type = mobs_a[x].mob; 
   }
   console.log(results)
   socket.emit('snapReply', results)
@@ -72,6 +75,7 @@ socket.on('staged', function() {
   }
 
 });
+
 
 socket.on('draw', function( snapshot ) {
   console.log("I am ready to draw but are these .. functions valid?")
@@ -91,6 +95,7 @@ socket.on('draw', function( snapshot ) {
   	ig.game.spawnEntity(EntityOtherPlayer, players[x].x, players[x].y, {gamename: players[x].tag})
   }
 	stat = true;
+  socket.emit("insert_player");
 });
 
 
@@ -109,7 +114,7 @@ socket.on('moveplayer', function( x, y, animation, client_name) {
 
 
 socket.on('rollcall', function() { 
-	socket.emit( 'salute', instance_name, room_name);
+	socket.emit('salute', instance_name, room_name);
 });
 
 socket.on('deletePlayer', function( name ) { 

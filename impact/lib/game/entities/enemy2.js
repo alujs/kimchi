@@ -12,7 +12,7 @@ ig.module(
     collides: ig.Entity.COLLIDES.ACTIVE,
     type: ig.Entity.TYPE.B,
     checkAgainst: ig.Entity.TYPE.A,
-    type: 'spider',
+    mob: 'spider', // I should just change this to the Entity name =/
     animation: '',
     health: 500,
     pts: 100,
@@ -122,7 +122,8 @@ ig.module(
     	if (GameInfo.score === 1000) {//Game is WON!
     		ig.game.gameWon();
     	}
-    	socket.emit("score", this.lastHit, this.pts); // Tells the server who killed the guy and the points. 
+    	socket.emit("score", this.lastHit, this.pts);
+    	socket.emit("mob_death", {mob: this.mob, tag: this.tag}); // Tells the server who killed the guy and the points. 
     	this.parent();
     }
   });

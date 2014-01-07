@@ -7,11 +7,18 @@ AI must behave deterministically.
 
 How do I resync? Take a snapshot of the game at a random interval, and ask all clients to resync 
 
+ULTRA PRIORTY:
+[] Migrate away from main/leveljs
+[] Sync up kills with the 'kill_mob'
+[] Smooth animations.
+[] Full Sync.
+
 ToDo: 
+
 [] Finish utilities
    [x] Should nuke a room
-   [] Should properly spawn mobs
-   [] Should properly record health etc. 
+   [x] Should properly spawn mobs
+   [x] Should properly record health etc. 
 [] Clear up player movement
    [x] Has smoother animations
    [] Needs a bit more clean up 

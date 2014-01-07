@@ -60,7 +60,7 @@ ig.module(
       this.parent();
     },
     check: function(other) {
-      
+      console.log("Hit")
       other.lastHit = this.owner; // When it hits a zombie, it marks the zombie as "I hit it last"
       other.receiveDamage(100, this); // This is critical for figuring out who gets what. 
       this.kill();
