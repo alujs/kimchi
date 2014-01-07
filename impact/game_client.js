@@ -1,38 +1,30 @@
 var socket = io.connect();
 var instance_name = prompt("Player Name"); 
 var room_name = "Room1"; 
-var stat = false;
+var _loaded = false;
 
 socket.emit('room', room_name, instance_name);
 	
 socket.emit('account', instance_name, room_name);
 
+socket.on('accountList', function( obj ) {
+  console.log(obj);
+});
 
-socket.on('addPlayer', function( list, name, coords ) { 
-	console.log("Initializing " + name)			 
-	if(stat === false ) {
-    stat = true;
-    return; 
-  }
-	for(var i in list) {						
-		if(list[i] !== instance_name) {
-			var temp = '' + list[i];
-			    temp = {gamename: list[i]};
-			console.log(temp)
-			ig.game.spawnEntity(EntityOtherPlayer, 1178, 861, temp);
-		}
-	}
+socket.on('addPlayer', function( name ) { 
+	console.log("Initializing " + name);			 
+	ig.game.spawnEntity(EntityOtherPlayer, 1178, 861, {gamename: name});
 });
 
 socket.on('root', function() {
   console.log("The player that initializes the room should spawn these.")
   socket.emit('zombie', 'render', {room: room_name});
-  stat = true;  	
+  _loaded = true;  	
 });
 
 socket.on('snapShot', function() { // I should just use _.extend ;_;
   console.log("Got a ping.")
-  if(stat === false) {
+  if(_loaded === false) {
   	console.log("I am new so no snapshot!")
   	return;
   }
@@ -69,7 +61,7 @@ socket.on('snapShot', function() { // I should just use _.extend ;_;
 
 socket.on('staged', function() {
 	console.log("I hear something")
-  if(stat === false) {
+  if(_loaded === false) {
   	console.log("I am new so I should get this message")
   	socket.emit('ready');
   }
@@ -78,24 +70,16 @@ socket.on('staged', function() {
 
 
 socket.on('draw', function( snapshot ) {
-  console.log("I am ready to draw but are these .. functions valid?")
-  console.log(snapshot);
   var mobs = snapshot.mobs;
   var players = snapshot.players; 
-  var m_type;
   for(var i in mobs) { 
-  	if(mobs[i].type === 'basic') {
-  	  m_type = EntityEnemy;
-  	} else {
-  	  m_type = EntityEnemy2;
-  	};
-  	ig.game.spawnEntity(m_type, mobs[i].x, mobs[i].y, {tag: mobs[i].tag});
+  	ig.game.spawnEntity(mobs[i].type, mobs[i].x, mobs[i].y, {tag: mobs[i].tag});
   }
   for(var x in players) {
   	ig.game.spawnEntity(EntityOtherPlayer, players[x].x, players[x].y, {gamename: players[x].tag})
   }
-	stat = true;
-  socket.emit("insert_player");
+	_loaded = true;
+  socket.emit("insert_player", instance_name);
 });
 
 
@@ -133,8 +117,16 @@ socket.on('spawnbullet', function( x, y, obj) {
 	ig.game.spawnEntity(EntityProjectile, x, y, obj); 
 });
 
+socket.on('kill_mob', function( obj ) {
+  var m_type = ig.game.getEntitiesByType(obj.mob);
+  for(var i = 0; i < m_type.length; i++) {
+    if(m_type[i].tag === obj.tag) {
+      m_type[i].kill('despawn');
+    }
+  }
+});
 
-socket.on('sync', function( entArr ) { // now is resync 
+socket.on('sync', function( entArr ) { 
   var tag;
   var zombies = ig.game.getEntitiesByType(EntityEnemy); 
   for(var i = 0; i < zombies.length; i++) { 
@@ -146,18 +138,15 @@ socket.on('sync', function( entArr ) { // now is resync
   }
 });
 
-socket.on('syncCall', function() { // receives a sync request and answers it with entities
+socket.on('syncCall', function() { 
   var myEntities = ig.game.getEntitiesByType(EntityEnemy); 
   socket.emit('myData', myEntities); 
 });
 
 socket.on('zrender', function( arr ) { // Renders the zombies. 
-  console.log("count")
 	for(var i = 0; i < arr.length; i++) {		
 		ig.game.spawnEntity(EntityEnemy2, arr[i].x, arr[i].y, arr[i].settings );
 	}
 });
 
-// socket.on('terminate', function( identity ) { 
-// });
 

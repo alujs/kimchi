@@ -12,7 +12,7 @@ ig.module(
     collides: ig.Entity.COLLIDES.ACTIVE,
     type: ig.Entity.TYPE.B,
     checkAgainst: ig.Entity.TYPE.A,
-    mob: 'spider', // I should just change this to the Entity name =/
+    mob: 'EntityEnemy2', // I should just change this to the Entity name =/
     animation: '',
     health: 500,
     pts: 100,
@@ -116,7 +116,11 @@ ig.module(
     	}
     	this.parent();
     },
-    kill: function() {
+    kill: function( removal ) {
+    	if(removal !== undefined) {
+          console.log('Despawning');
+          return;
+        };
     	ig.game.increaseScore(100); //adds to score
     	ig.game.addKillCount(); //adds to kill count
     	if (GameInfo.score === 1000) {//Game is WON!

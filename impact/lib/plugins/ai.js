@@ -16,12 +16,30 @@ ig.module( // move this to back end later.  LOL NOPE.
 
     getAction: function(entity) {
       this.entity = entity;
-      var playerList = ig.game.getEntitiesByType('EntityPlayer');
-      var player = playerList[0];
-      var distance = this.entity.distanceTo(player);
-      var angle = this.entity.angleTo(player);
-      var x_dist = distance * Math.cos(angle);
-      var y_dist = distance * Math.sin(angle);
+      var distm = '';
+      var closest = {};
+          closest.distance = 9000; 
+          closest.player = '';
+      var playerList = ig.game.getEntitiesByType(EntityOtherPlayer); // refactor the AI to make it make sense. 
+      var player_client = ig.game.getEntitiesByType(EntityPlayer); // <-- this part makes no sense in multiplayer =(
+      
+      for(var i = 0; i < playerList.length; i++) {
+        if(this.entity.distanceTo(playerList[i]) <= closest.distance) {
+          distm = this.entity.distanceTo(playerList[i]);
+          closest.player = playerList[i];
+          closest.distance = distm + 0;
+        }
+      }
+
+      distm = this.entity.distanceTo(player_client[0]);
+      if(distm <= closest.distance) {
+        closest.player = player_client[0];
+        closest.distance = distm; 
+      }
+
+      var angle = this.entity.angleTo(closest.player);
+      var x_dist = closest.distance * Math.cos(angle);
+      var y_dist = closest.distance * Math.sin(angle);
       var collision = ig.game.collisionMap;
       var res = collision.trace(this.entity.pos.x, this.entity.pos.y, x_dist, y_dist, this.entity.size.x, this.entity.size.y);
       if (res.collision.x) {
@@ -38,13 +56,13 @@ ig.module( // move this to back end later.  LOL NOPE.
           return this.doAction(ig.ai.ACTION.MoveRight);
         }
       }
-      if (distance < 70) {
+      if (closest.distance < 70) {
          if(this.attackTimer.delta()>0) {
           this.attackTimer.set(2);
           return this.doAction(ig.ai.ACTION.Attack);
          }
       }
-      if (distance > 30 && distance < 4000) {
+      if (closest.distance > 30 && closest.distance < 4000) {
         if (Math.abs(angle) < Math.PI / 4) {
           return this.doAction(ig.ai.ACTION.MoveRight);
         }

@@ -9,7 +9,7 @@ How do I resync? Take a snapshot of the game at a random interval, and ask all c
 
 ULTRA PRIORTY:
 [] Migrate away from main/leveljs
-[] Sync up kills with the 'kill_mob'
+[x] Sync up kills with the 'kill_mob' // sort of LOLZ
 [] Smooth animations.
 [] Full Sync.
 

@@ -25,6 +25,8 @@ exports.handler = function( socket ) {
 
   socket.on('room', function( room, instance_name ) { 
   	if(rooms[room] === undefined) {
+      scores[room] = {};
+      scores[room].name = {};
       snapshot[room] = {};
       snapshot[room].players = {};
       snapshot[room].mobs = {};
@@ -100,12 +102,14 @@ exports.handler = function( socket ) {
    io.sockets.socket(socket.id).emit('draw', snapshot[room]);
  });
   
- socket.on('insertPlayer', function() {
+ socket.on('insert_player', function( name ) {
    var instance = ids[socket.id];
        instance = rooms[instance];
 
-    for(var i in instance.socketid) { 
-      io.sockets.socket(instance.socketid[i]).emit('addPlayer', instance.playerList);
+    for(var i in instance.socketid) {
+      if(instance.socketid[i] !== socket.id) {
+       io.sockets.socket(instance.socketid[i]).emit('addPlayer', name);
+      };
     }
  });
 
@@ -193,7 +197,7 @@ exports.handler = function( socket ) {
    var instance = ids[socket.id];
        instance = rooms[instance];
     for(var i in instance.socketid) {
-      io.sockets.socket(instance.socket[i]).emit('kill_mob', obj);
+      io.sockets.socket(instance.socketid[i]).emit('kill_mob', obj);
     }
  });
 
@@ -203,20 +207,21 @@ exports.handler = function( socket ) {
    name_base[name].child('kills').set(0);
    name_base[name].child('score').set(0);
 
-   scores[room] = {};
-   scores[room].name = {};
+   
    scores[room].name[name] = {};
    scores[room].name[name].kills = 0;
    scores[room].name[name].score = 0;   
-
+   io.sockets.socket(socket.id).emit('accountList', scores);
  });
 
  socket.on('score', function( kb, points ) {
     var instance = ids[socket.id]; 
-    scores[instance].name[kb].kills += 1; 
-    scores[instance].name[kb].score += points;
-    name_base[kb].child('kills').set( scores[instance].name[kb].kills );
-    name_base[kb].child('score').set( scores[instance].name[kb].score );
+    var name = kb;
+    io.sockets.socket(socket.id).emit('accountList', scores);
+    scores[instance].name[name].kills += 1; 
+    scores[instance].name[name].score += points;
+    name_base[name].child('kills').set( scores[instance].name[name].kills );
+    name_base[name].child('score').set( scores[instance].name[name].score );
  });
 
 
