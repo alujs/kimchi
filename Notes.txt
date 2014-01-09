@@ -12,5 +12,5 @@ ULTRA PRIORTY:
 [-] Smooth animations.
  [] Renders other clients' firing 
 
-[GO] Full Sync.
+[] Full Sync.
 
