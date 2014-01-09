@@ -8,56 +8,9 @@ AI must behave deterministically.
 How do I resync? Take a snapshot of the game at a random interval, and ask all clients to resync 
 
 ULTRA PRIORTY:
-[] Migrate away from main/leveljs
-[x] Sync up kills with the 'kill_mob' // sort of LOLZ
-[] Smooth animations.
-[] Full Sync.
+[-] Migrate away from main/leveljs
+[-] Smooth animations.
+ [] Renders other clients' firing 
 
-ToDo: 
+[GO] Full Sync.
 
-[] Finish utilities
-   [x] Should nuke a room
-   [x] Should properly spawn mobs
-   [x] Should properly record health etc. 
-[] Clear up player movement
-   [x] Has smoother animations
-   [] Needs a bit more clean up 
-   [] Need to spawn according to server Instructions
-[] Utilize cookies
-   [] Players should be spawned based on what the cookie says
-[] Resyncing
-   [] Should resync
-
-var resync = function() {
-	// randomly selects two clients that aren't being culled
-	// Asks them for an array of their entities. 
-	// chooses one of them as the game state 
-	// sends a signal to all zombies to resync. 
-};
-
-
-
-var seeds = function() {
-	// takes a bunch of random values
-	// seeds an array and sends it to the AI , the AI then uses the array
-	// all new things will be initialized using that array. 
-	// feeds it into the client
-   // everything is done in order
-  
-};
-
-
-var nukeRoom = function() {
-	// if a room has zero users, write the scores to the profile
-    // drop the room from database
-};
-
-var gameOver = function() {
-	// Check to see if all the players are dead
-	// redirect page or show a pop up
-	// call nukeRoom 
-};
-
-var killPlayer = function() {
-	
-};

@@ -32,12 +32,15 @@ exports.handler = function( socket ) {
       snapshot[room].mobs = {};
       snapshot[room].req = 0;
       snapshot[room].init = true; 
-  		rooms[room] = {};            
+  		rooms[room] = {};
+      rooms[room].syncCall = false;         
   		rooms[room].playerList = {}; 
   		rooms[room].socketid = {};
       rooms[room].playerCount = 1;   
   		rooms[room].playerList[instance_name] = instance_name; // Also instances are needed so we can have
   		rooms[room].socketid[socket.id] = socket.id; // unlimited games hosted. 
+      sync(rooms[room]);
+
   	} else {
       rooms[room].playerList[instance_name] = instance_name;
       rooms[room].socketid[socket.id] = socket.id;
@@ -62,41 +65,44 @@ exports.handler = function( socket ) {
     }
   });
 
-  socket.on('snapReply', function( obj ) { // need a mutex?
+  socket.on('snapReply', function( obj, flags ) { // need a mutex?
     if(obj === undefined) {
       return; 
     }
-
     var instance = ids[socket.id];
         instance = rooms[instance];
     var room = ids[socket.id];
 
-    if(snapshot[room].req !== 0) { // Prevents multiple returns... sort of .
+    if(flags !== undefined) {
+      if(snapshot[room].req !== false) { 
+        return; 
+      } else {
+        for(var k in instance.socketid) { 
+          io.sockets.socket(instance.socketid[k]).emit('staged', flags);
+        };
+      } 
+      return;
+    };
+  
+    if(snapshot[room].req !== 0) { 
       return; 
     } 
     snapshot[room].req = 1; 
-
-    for(var i in obj.players) {
-       snapshot[room].players[i] = {};
-       snapshot[room].players[i].x = obj.players[i].x;
-       snapshot[room].players[i].y = obj.players[i].y;
-       snapshot[room].players[i].tag = obj.players[i].tag;
-    }
-
-    for(var z in obj.mobs) {
-       snapshot[room].mobs[z] = {};
-       snapshot[room].mobs[z].x = obj.mobs[z].x; 
-       snapshot[room].mobs[z].y = obj.mobs[z].y;
-       snapshot[room].mobs[z].tag = obj.mobs[z].tag;
-       snapshot[room].mobs[z].type = obj.mobs[z].type;
-    }
-    
+    processShot(obj, room);  
     for(var k in instance.socketid) { 
        io.sockets.socket(instance.socketid[k]).emit('staged');
     }
   });
 
- socket.on('ready', function() {
+ socket.on('ready', function( flags ) {
+   if(flags !== undefined) {
+     var instance = ids[socket.id];
+         instance = rooms[instance];
+    for(var k in instance.socketid) { 
+       io.sockets.socket(instance.socketid[k]).emit('reMap');
+    }
+    return;
+   }
    var room = ids[socket.id];
    snapshot[room].req = 0;
    io.sockets.socket(socket.id).emit('draw', snapshot[room]);
@@ -113,12 +119,12 @@ exports.handler = function( socket ) {
     }
  });
 
-  socket.on('updatemove', function( x, y, animation, client_name) { // eventually store and do checking before broadcasting
+  socket.on('updatemove', function( x, y, animation, client_name, velx, vely) { // eventually store and do checking before broadcasting
   	var instance = ids[socket.id];
         instance = rooms[instance];
 
     for(var i in instance.socketid) { // My next refactoring will be to use velocity rather than x/y
-  	  io.sockets.socket(instance.socketid[i]).emit('moveplayer', x, y, animation, client_name);
+  	  io.sockets.socket(instance.socketid[i]).emit('moveplayer', x, y, animation, client_name, velx, vely);
   	}                                
   });
 
@@ -224,39 +230,32 @@ exports.handler = function( socket ) {
     name_base[name].child('score').set( scores[instance].name[name].score );
  });
 
-
- socket.on('myData', function( data ) {
-   var instance = ids[socket.id];  
-       instance = rooms[instance];
-
-   if(entity[instance] === undefined) {
-     entity[instance] = [];
-     entity[instance].push(data);
-   } else {
-     entity[instance].push(data);
-   }
-
-   if(hasCalled) {
-     hasCalled = false; 
-     setTimeout(function() {
-       var chosen = util('resync', entity[instance]);
-       for(var i in instance.socketid) {  
-        io.sockets.socket(instance.socketid[i]).emit('sync', chosen);
-       };
-       hasCalled = true;
-       entity[instance] = [];  
-     }, 1000);
-   }
-
- });
-
  };
 
 
- exports.sync = function( self ) { 
-   io.sockets.emit('syncCall');
-   var that = self; // I don't even...
-   setTimeout( function() {
-     self(that);
-   } ,10000)
- }; 
+var sync = function( room ) {
+  var that = room; 
+  for(var i in room.socketid) {
+    io.sockets.socket(room.socketid[i]).emit('snapShot', 'resync');
+  };
+  setTimeout(function() {
+    sync(that);
+  },5000);
+}
+
+var processShot = function( obj, room ) {
+    for(var i in obj.players) {
+       snapshot[room].players[i] = {};
+       snapshot[room].players[i].x = obj.players[i].x;
+       snapshot[room].players[i].y = obj.players[i].y;
+       snapshot[room].players[i].tag = obj.players[i].tag;
+    }
+
+    for(var z in obj.mobs) {
+       snapshot[room].mobs[z] = {};
+       snapshot[room].mobs[z].x = obj.mobs[z].x; 
+       snapshot[room].mobs[z].y = obj.mobs[z].y;
+       snapshot[room].mobs[z].tag = obj.mobs[z].tag;
+       snapshot[room].mobs[z].type = obj.mobs[z].type;
+    }
+};
