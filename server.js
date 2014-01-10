@@ -1,6 +1,6 @@
 var Firebase = require('firebase');
 var express = require('express'),
-    port = 8081,
+    port = process.env.PORT || 8081,
     root = __dirname + '/impact/',
     app = express();
 var io = require('socket.io');

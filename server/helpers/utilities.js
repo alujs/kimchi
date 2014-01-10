@@ -16,16 +16,6 @@ module.exports = function( type, args ) {
 		target.remove();
 	};
 
-	ut.gameOver = function() {
-		// Check to see if all the players are dead
-		// redirect page or show a pop up
-		// call nukeRoom 
-	};
-
-	ut.killPlayer = function() {
-		
-	};
-  
   if(type === 'resync') {
   	return ut[type](args); 
   } else {

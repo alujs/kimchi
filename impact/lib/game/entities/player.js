@@ -32,8 +32,8 @@ ig.module (
 
   	animSheet: new ig.AnimationSheet ('media/main1.png', 48, 48), //this will now be our primary character
 
-    // sound: new ig.Sound( 'media/sounds/sniper.mp3' ),
-    // walking: new ig.Sound('media/sounds/walking.mp3'),
+    sound: new ig.Sound( 'media/sounds/burst.mp3' ),
+    walking: new ig.Sound('media/sounds/walking.mp3'),
     // levelup: new ig.Sound('media/sounds/levelgain.mp3')
 
   	init: function(x, y, settings) { //animation frame changes
@@ -64,14 +64,14 @@ ig.module (
 
   	update: function() {
       this.parent();
-      // if (this.walkTimer.delta() > 0 && this.vel.x !== 0 && this.vel.y !== 0) {
-      //     this.walking.play();
-      //     this.walkTimer.set(0.5);
-      //   }
       if (!ig.input.state('fire')) {
         this.speed = 100;
       }
       if (ig.input.state('left') && ismove != 1 && ismove != 2 && ismove != 4) {
+        if (this.walkTimer.delta() > 0) {
+          this.walking.play();
+          this.walkTimer.set(0.5);
+        }
         this.vel.x = -this.speed;
         ismove = 3;
         this.direction = 3;
@@ -80,6 +80,10 @@ ig.module (
         }
         this.currentAnimation = 'left';
       } else if (ig.input.state('right') && ismove != 1 && ismove != 3 && ismove != 4) {
+        if (this.walkTimer.delta() > 0) {
+          this.walking.play();
+          this.walkTimer.set(0.5);
+        }
         this.vel.x = +this.speed;
         ismove = 2;
         this.direction = 2;
@@ -88,6 +92,10 @@ ig.module (
         }
         this.currentAnimation = 'right';
       } else if (ig.input.state('up') && ismove != 2 && ismove != 3 && ismove != 4) {
+        if (this.walkTimer.delta() > 0) {
+          this.walking.play();
+          this.walkTimer.set(0.5);
+        }
         this.vel.y = -this.speed;
         ismove = 1;
         this.direction = 1;
@@ -96,6 +104,10 @@ ig.module (
         }
         this.currentAnimation = 'up';
       } else if (ig.input.state('down') && ismove != 2 && ismove != 3 && ismove != 1) {
+        if (this.walkTimer.delta() > 0) {
+          this.walking.play();
+          this.walkTimer.set(0.5);
+        }
         this.vel.y = +this.speed;
         ismove = 4;
         this.direction = 4;
@@ -132,6 +144,7 @@ ig.module (
       if (ig.input.state('fire') && this.canShoot) {
         this.speed = 70;
         if (this.direction === 2) {
+          this.sound.play();
           socket.emit('firing', this.pos.x+35, this.pos.y+15, this.direction, 'fireright', this.gamename)
           if (ig.input.state('right')) { //THIS IS VERY NECESSARY FOR CLEAN ANIMATION!
             this.currentAnim = this.anims.fireright;
@@ -139,6 +152,7 @@ ig.module (
             this.currentAnim = this.anims.fireidleright;
           }
         } else if (this.direction === 4) {
+          this.sound.play();
           socket.emit('firing', this.pos.x+5, this.pos.y+35, this.direction, 'firedown', this.gamename)
           if (ig.input.state('down')) {
             this.currentAnim = this.anims.firedown;
@@ -146,6 +160,7 @@ ig.module (
             this.currentAnim = this.anims.fireidledown;
           }
         } else if (this.direction === 3) {
+          this.sound.play();
           socket.emit('firing', this.pos.x-20, this.pos.y+15, this.direction, 'fireleft', this.gamename)
           if (ig.input.state('left')) {
             this.currentAnim = this.anims.fireleft;
@@ -153,6 +168,7 @@ ig.module (
             this.currentAnim = this.anims.fireidleleft;
           }
         } else if (this.direction === 1) {
+          this.sound.play();
           socket.emit('firing', this.pos.x+15, this.pos.y-15, this.direction, 'fireup', this.gamename)
           if (ig.input.state('up')) {
             this.currentAnim = this.anims.up;
@@ -160,6 +176,7 @@ ig.module (
             this.currentAnim = this.anims.fireidleup;
           }
         }
+        
         this.canShoot = false;
       }
       if (this.netTimer < 1) {

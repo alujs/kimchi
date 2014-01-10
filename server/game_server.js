@@ -33,6 +33,7 @@ exports.handler = function( socket ) {
       snapshot[room].req = 0;
       snapshot[room].init = true; 
   		rooms[room] = {};
+      rooms[room].zcall = false;
       rooms[room].syncCall = false;
       rooms[room].psocket = {};         
   		rooms[room].playerList = {}; 
@@ -126,7 +127,9 @@ exports.handler = function( socket ) {
         instance = rooms[instance];
 
     for(var i in instance.socketid) { // My next refactoring will be to use velocity rather than x/y
-  	  io.sockets.socket(instance.socketid[i]).emit('moveplayer', x, y, animation, client_name, velx, vely);
+      if(instance.socketid !== undefined) {
+        io.sockets.socket(instance.socketid[i]).emit('moveplayer', x, y, animation, client_name, velx, vely);
+      } 	  
   	}                                
   });
 
@@ -140,8 +143,9 @@ exports.handler = function( socket ) {
     
     if(instance.playerCount === 0) {
       console.log("Nuking ze room: " + room)
-      util('nukeRoom', room);
-      snapshot[room] === undefined; 
+      util('nukeRoom', room, room[room]);
+      delete snapshot[room]; 
+      delete rooms[room];
       return;
     }
 
@@ -189,16 +193,13 @@ exports.handler = function( socket ) {
   });
 
 
- socket.on('zombie', function( type, obj ) {
+ socket.on('zombie', function( type ) {
     var instance = ids[socket.id];   
         instance = rooms[instance];  
-    if(base[obj.room] === undefined) { 
-      base[obj.room] = new db("https://hrproj.firebaseio.com/Rooms/" + obj.room + "/Zombies");
-      zomb.ai['spawner'](base[obj.room]); 
-    }
-    for(var i in instance.socketid) {
-      zomb.ai[type]( io.sockets.socket(instance.socketid[i]), base[obj.room], obj);
-    }
+    if(instance.zcall === false) {
+      zomb.ai['render'](io, socket.id)
+      instance.zcall = true; 
+    };
  });
 
  socket.on('mob_death', function( obj ) {

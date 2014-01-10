@@ -4,7 +4,7 @@ var room_name = "Room2";
 var _loaded = false;
 
 socket.emit('room', room_name, instance_name);
-	
+
 socket.emit('account', instance_name, room_name);
 
 socket.on('accountList', function( obj ) {
@@ -18,7 +18,7 @@ socket.on('addPlayer', function( name ) {
 
 socket.on('root', function() {
   console.log("The player that initializes the room should spawn these.")
-  socket.emit('zombie', 'render', {room: room_name});
+  socket.emit('zombie', 'render');
   _loaded = true;  	
 });
 
@@ -103,9 +103,10 @@ socket.on('kill_mob', function( obj ) {
 });
 
 
-socket.on('zrender', function( arr ) { // Renders the zombies. 
+socket.on('zrender', function( arr ) {
+  console.log(arr);
 	for(var i = 0; i < arr.length; i++) {		
-		ig.game.spawnEntity(EntityEnemy2, arr[i].x, arr[i].y, arr[i].settings );
+		ig.game.spawnEntity(EntityEnemy, arr[i].x, arr[i].y, arr[i].settings );
 	}
 });
 
