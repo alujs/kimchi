@@ -15,6 +15,8 @@ ig.module(
     animation: '',
     health: 500,
     pts: 100,
+    atk: new ig.Sound('media/sounds/tank.mp3'),
+    zombieDead: new ig.Sound('media/sounds/zombieDead.mp3'),
     lastHit: 'None',
     speed: 30,
     deeps: 30, 
@@ -64,6 +66,8 @@ ig.module(
 		this.animation = 'zombieDown';
 		break;
 		case ig.ai.ACTION.Attack:
+        console.log("Attacking " + closest.gamename)
+        this.atk.play();
         socket.emit('playerDamaged', {name: closest.gamename, damage: this.deeps});  
 		this.currentAnim = this.anims.idle;
 		this.vel.x = 0;
@@ -84,6 +88,7 @@ ig.module(
         if(removal !== undefined) {
           return;
         };
+        this.zombieDead.play();
     	socket.emit("score", this.lastHit, this.pts);
         socket.emit("mob_death", {mob: this.mob, tag: this.tag}); // Tells the server who killed the guy and the points. 
         this.parent();

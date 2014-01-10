@@ -34,17 +34,19 @@ exports.handler = function( socket ) {
   		rooms[room] = {};
       rooms[room].zcall = false;
       rooms[room].syncCall = false;
-      rooms[room].psocket = {};         
+      rooms[room].psocket = {};
+      rooms[room].difficulty = 1;          
   		rooms[room].playerList = {}; 
   		rooms[room].socketid = {};
       rooms[room].playerCount = 1;  
       rooms[room].psocket[instance_name] = socket.id;
   		rooms[room].playerList[instance_name] = instance_name; // Also instances are needed so we can have
   		rooms[room].socketid[socket.id] = socket.id; // unlimited games hosted. 
-      sync(rooms[room]);
+      sync(rooms[room], rooms[room].wait);
 
   	} else {
       rooms[room].playerList[instance_name] = instance_name;
+      rooms[room].psocket[instance_name] = socket.id;
       rooms[room].socketid[socket.id] = socket.id;
       rooms[room].playerCount += 1;
   	}
@@ -72,12 +74,17 @@ exports.handler = function( socket ) {
     var instance = ids[socket.id];
         instance = rooms[instance];
     var room = ids[socket.id];
-    processShot(obj, room);
+
     if(flags !== undefined) {
+      snapshot[room] = {};
+      snapshot[room].players = {};
+      snapshot[room].mobs = {};
+      processShot(obj, room);
       for(var k in instance.socketid) { 
         io.sockets.socket(instance.socketid[k]).emit('staged', 'flags');
       };
     } else {  
+      processShot(obj, room);
       for(var k in instance.socketid) { 
          io.sockets.socket(instance.socketid[k]).emit('staged');
       }
@@ -134,7 +141,7 @@ exports.handler = function( socket ) {
       delete rooms[room];
       return;
     }
-
+    delete instance.socketid[socket.id];
     for(var i in instance.socketid) {
   	  io.sockets.socket(instance.socketid[i]).emit('rollcall');
   	}                            
@@ -154,21 +161,6 @@ exports.handler = function( socket ) {
 
   	instance.playerList[name] = true;
   });
-
-  var cullPlayers = function( instance, room ) { 
-    for(var i in instance.playerList) {   
-      if(instance.playerList[i] === true) { 
-      	instance.playerList[i] = i;
-        hasPlayers = true;       
-      } else {
-      	for(var x in instance.socketid) {
-  	      io.sockets.socket(instance.socketid[x]).emit('deletePlayer', i)
-  	    }                               
-      }                                
-    }
-  
-    hasCulled = false;
-  };
  
  socket.on('firing', function( x, y, direction, animation, gamename ) {
     var instance = ids[socket.id];  
@@ -231,15 +223,11 @@ exports.handler = function( socket ) {
  socket.on('defeated', function( name ) {
    var instance = ids[socket.id];
        instance = rooms[instance];
-       instance.playerCount -= 1;
+
    for(var i in instance.socketid) {
-      if(instance.socketid[i] !== socket.id) {
         io.sockets.socket(instance.socketid[i]).emit('killPlayer', name);
       };
-    };
-    var room = ids[socket.id];
-   delete rooms[room].playerList[name];
-   delete rooms[room].socketid[socket.id];
+    
  });
 
  };
@@ -258,7 +246,7 @@ var sync = function( room ) {
   };
   setTimeout(function() {
     sync(that);
-  },2000);
+  }, 5000);
 }
 
 var processShot = function( obj, room ) {
@@ -276,4 +264,18 @@ var processShot = function( obj, room ) {
        snapshot[room].mobs[z].tag = obj.mobs[z].tag;
        snapshot[room].mobs[z].type = obj.mobs[z].type;
     }
+};
+
+var cullPlayers = function( instance, room ) { 
+  for(var i in instance.playerList) {   
+    if(instance.playerList[i] === true) { 
+      instance.playerList[i] = i;
+      hasPlayers = true;       
+    } else {
+      for(var x in instance.socketid) {
+        io.sockets.socket(instance.socketid[x]).emit('deletePlayer', i)
+      }                               
+    }                                
+  }
+  hasCulled = false;
 };

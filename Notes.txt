@@ -1,16 +1,25 @@
-How can I fix the AI? 
+Tasklist: 
+[] Splash Page
+[] Server side monster scaling 
+   [] Should increase over time in numbers
+   [] Should not spawn in walls or water
+   [] Should increase in speed and strength as well as score
+[] Distance based sound - another player's machine gun fire should sound off
+[] Sound track based on difficulty
+     - Wesker's Theme - speed increase, damge increase
+     - Sacred War - health decrease, massive numbers, slow movement
+     - Cat Groove - everything, double spiders.
+[] Some way to display final score
+[] Spawn spider mob - have it fire speed debuffing shots. Instead of setting speed,
+   on the player and resetting it, just subtract. 
+[] Load Test
 
 
-Periodically get three seed values and put that in for the determine? 
-
-AI must behave deterministically.
-
-How do I resync? Take a snapshot of the game at a random interval, and ask all clients to resync 
-
-ULTRA PRIORTY:
-[-] Migrate away from main/leveljs
-[-] Smooth animations.
- [] Renders other clients' firing 
-
-[] Full Sync.
-
+Target Cooridnates for ideal spawning: 
+{x: 629.6300000000108, y: 485.6200000000082} - NW
+Object {x: 651.3900000000101, y: 1148.2400000000935} - SW , prime spot for spiders
+Object {x: 921.2900000000568, y: 1131.8400000000777} - S
+Object {x: 1371.2000000000255, y: 1085.2400000000769} - s
+Object {x: 1639.6000000000622, y: 1056.9400000000696} - SE
+Object {x: 1723.0000000000682, y: 490.19999999999095} - NE
+Object {x: 1322.5000000000346, y: 485.3999999999794} - N

@@ -109,6 +109,7 @@ socket.on('zrender', function( arr ) {
 });
 
 socket.on('damageTaken', function( damage ) {
+  console.log('Ouch!')
   var player = ig.game.getEntitiesByType(EntityPlayer);
   player[0].receiveDamage( damage );
 });
