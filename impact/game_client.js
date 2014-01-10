@@ -7,9 +7,6 @@ socket.emit('room', room_name, instance_name);
 
 socket.emit('account', instance_name, room_name);
 
-socket.on('accountList', function( obj ) {
-  console.log(obj);
-});
 
 socket.on('addPlayer', function( name ) { 
 	console.log("Initializing " + name);			 
@@ -24,12 +21,9 @@ socket.on('root', function() {
 
 socket.on('snapShot', function( flags ) { 
   var results; 
-  if(_loaded === false) {
-  	return;
-  };
   if( flags !== undefined ) {
     results = gameState();
-    console.log('Syncing')
+    console.log('Syncing.. for I am the master')
     socket.emit('snapReply', results, flags);
   } else {
     results = gameState();
@@ -37,22 +31,29 @@ socket.on('snapShot', function( flags ) {
   }
 });
 
-socket.on('staged', function() {
+socket.on('staged', function( flags ) {
   if(_loaded === false) {
   	socket.emit('ready');
-  } else {
-    socket.emit('ready', 'sync')
+    return;
+  }
+  if(flags !== undefined) {
+    socket.emit('ready', 'sync');
   }
 });
 
 
 socket.on('draw', function( snapshot ) {
- redraw(snapshot);
-	_loaded = true;
-  socket.emit("insert_player", instance_name);
+  if(_loaded === false) {
+    redraw(snapshot);
+  	_loaded = true;
+    socket.emit("insert_player", instance_name);
+  }
 });
 
 socket.on('reMap', function( snapshot ) {
+  if(_loaded === false) {
+    return;
+  }
   remap(snapshot);
 });
 
@@ -63,8 +64,6 @@ socket.on('moveplayer', function( x, y, animation, client_name, velx, vely) {
       playermove[i].vel.x = 0;
       playermove[i].vel.y = 0;
 			playermove[i].animation = animation; 
-			// playermove[i].pos.x = x;
-			// playermove[i].pos.y = y; 
       playermove[i].vel.x = velx;
       playermove[i].vel.y = vely;
 			return;
@@ -104,7 +103,6 @@ socket.on('kill_mob', function( obj ) {
 
 
 socket.on('zrender', function( arr ) {
-  console.log(arr);
 	for(var i = 0; i < arr.length; i++) {		
 		ig.game.spawnEntity(EntityEnemy, arr[i].x, arr[i].y, arr[i].settings );
 	}
@@ -120,6 +118,7 @@ socket.on('killPlayer', function( name ) {
   for(var i = 0; i < target.length; i++ ) {
     if(target.gamename === name) {
        target.kill(); 
+       console.log(name + " has been slain! ")
        return;
     }
   }
@@ -177,18 +176,17 @@ var gameState = function() {
     results.mobs[x].y = mobs_a[x].pos.y;
     results.mobs[x].type = mobs_a[x].mob; 
   };
-
   return results; 
 }
 
 var remap = function( snapshot ) {
-  console.log("Resyncing")
+  
   var pents = playerents();
   var ments = mobsents();
   var plength = pents.length;
   var mlength = ments.length;
   for(var i = 0; i < plength; i++) {
-    for(var x in snapshot) {
+    for(var x in snapshot.players) {
       if(snapshot.players[x].tag === pents[i].gamename) {
         pents[i].pos.x = snapshot.players[x].x; 
         pents[i].pos.y = snapshot.players[x].y;
@@ -196,7 +194,7 @@ var remap = function( snapshot ) {
     }
   }
   for(var k = 0; k < mlength; k++) {
-    for(var z in snapshot) {
+    for(var z in snapshot.mobs) {
       if(snapshot.mobs[z].tag === ments[k].tag && snapshot.mobs[z].type === ments[k].mob) {
         ments[k].pos.x = snapshot.mobs[z].x;
         ments[k].pos.y = snapshot.mobs[z].y;

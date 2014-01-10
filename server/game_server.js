@@ -30,7 +30,6 @@ exports.handler = function( socket ) {
       snapshot[room] = {};
       snapshot[room].players = {};
       snapshot[room].mobs = {};
-      snapshot[room].req = 0;
       snapshot[room].init = true; 
   		rooms[room] = {};
       rooms[room].zcall = false;
@@ -65,49 +64,36 @@ exports.handler = function( socket ) {
     }
     for(var i in instance.socketid) {
       io.sockets.socket(instance.socketid[i]).emit('snapShot');
+      return;
     }
   });
 
   socket.on('snapReply', function( obj, flags ) { // need a mutex?
-    if(obj === undefined) {
-      return; 
-    }
     var instance = ids[socket.id];
         instance = rooms[instance];
     var room = ids[socket.id];
-
+    processShot(obj, room);
     if(flags !== undefined) {
-      if(snapshot[room].req !== false) { 
-        return; 
-      } else {
-        for(var k in instance.socketid) { 
-          io.sockets.socket(instance.socketid[k]).emit('staged', flags);
-        };
-      } 
-      return;
-    };
-  
-    if(snapshot[room].req !== 0) { 
-      return; 
-    } 
-    snapshot[room].req = 1; 
-    processShot(obj, room);  
-    for(var k in instance.socketid) { 
-       io.sockets.socket(instance.socketid[k]).emit('staged');
+      for(var k in instance.socketid) { 
+        io.sockets.socket(instance.socketid[k]).emit('staged', 'flags');
+      };
+    } else {  
+      for(var k in instance.socketid) { 
+         io.sockets.socket(instance.socketid[k]).emit('staged');
+      }
     }
   });
 
  socket.on('ready', function( flags ) {
+   var room = ids[socket.id];
    if(flags !== undefined) {
      var instance = ids[socket.id];
          instance = rooms[instance];
     for(var k in instance.socketid) { 
-       io.sockets.socket(instance.socketid[k]).emit('reMap');
+       io.sockets.socket(instance.socketid[k]).emit('reMap', snapshot[room]);
     }
     return;
    }
-   var room = ids[socket.id];
-   snapshot[room].req = 0;
    io.sockets.socket(socket.id).emit('draw', snapshot[room]);
  });
   
@@ -125,11 +111,11 @@ exports.handler = function( socket ) {
   socket.on('updatemove', function( x, y, animation, client_name, velx, vely) { // eventually store and do checking before broadcasting
   	var instance = ids[socket.id];
         instance = rooms[instance];
-
+    if(instance === undefined) {
+      return;
+    }
     for(var i in instance.socketid) { // My next refactoring will be to use velocity rather than x/y
-      if(instance.socketid !== undefined) {
-        io.sockets.socket(instance.socketid[i]).emit('moveplayer', x, y, animation, client_name, velx, vely);
-      } 	  
+        io.sockets.socket(instance.socketid[i]).emit('moveplayer', x, y, animation, client_name, velx, vely);	  
   	}                                
   });
 
@@ -140,7 +126,7 @@ exports.handler = function( socket ) {
     var room = ids[socket.id];   
     console.log("A client has disconnected from an instance:  " + room)
     instance.playerCount -= 1;  
-    
+
     if(instance.playerCount === 0) {
       console.log("Nuking ze room: " + room)
       util('nukeRoom', room, room[room]);
@@ -245,11 +231,15 @@ exports.handler = function( socket ) {
  socket.on('defeated', function( name ) {
    var instance = ids[socket.id];
        instance = rooms[instance];
+       instance.playerCount -= 1;
    for(var i in instance.socketid) {
       if(instance.socketid[i] !== socket.id) {
         io.sockets.socket(instance.socketid[i]).emit('killPlayer', name);
       };
     };
+    var room = ids[socket.id];
+   delete rooms[room].playerList[name];
+   delete rooms[room].socketid[socket.id];
  });
 
  };
@@ -261,7 +251,10 @@ exports.handler = function( socket ) {
 var sync = function( room ) {
   var that = room; 
   for(var i in room.socketid) {
-    io.sockets.socket(room.socketid[i]).emit('snapShot', 'resync');
+    if(room.socketid[i] !== undefined) {
+      io.sockets.socket(room.socketid[i]).emit('snapShot', 'resync');
+      break;
+    };
   };
   setTimeout(function() {
     sync(that);

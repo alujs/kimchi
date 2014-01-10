@@ -63,13 +63,13 @@ ig.module(
 		this.vel.y = this.speed;
 		this.animation = 'zombieDown';
 		break;
-		case 'ig.ai.ACTION.Attack':
+		case ig.ai.ACTION.Attack:
+        socket.emit('playerDamaged', {name: closest.gamename, damage: this.deeps});  
 		this.currentAnim = this.anims.idle;
 		this.vel.x = 0;
 		this.vel.y = 0;
 		this.animation = 'idle';
-		// closest.receiveDamage(30, this);
-        socket.emit('playerDamaged', {name: closest.gamename, damage: this.deeps}); 
+        
 		break; // We're probably gonna have to change this later since everyone's entityPlayer should be
 		default: // Different or maybe not, I need to test it. But we prob. need a more precise way of dealing.
 		this.currentAnim = this.anims.idle; // my last comments will beo n the AI.
@@ -82,7 +82,6 @@ ig.module(
     },
     kill: function( removal ) {
         if(removal !== undefined) {
-          console.log('Despawning');
           return;
         };
     	socket.emit("score", this.lastHit, this.pts);

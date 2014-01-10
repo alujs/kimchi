@@ -82,6 +82,9 @@ ig.module(
 		gameLost: function() {
 			console.log("Called lost");
 			ig.system.setGame(MissionFail);
+			setTimeout( function() {
+			  window.location = ('/');
+			}, 3000);
 		},
 		
 		init: function() {
