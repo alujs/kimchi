@@ -27,25 +27,18 @@ ig.module(
 		},
 
 		update: function() {
-			if (ig.input.pressed('LoadGame')) {
-				ig.system.setGame(MyGame);
-				GameInfo.killCount = 0;
-				GameInfo.score = 0;
-			}
 		},
 
 		draw: function() {
 			this.parent();
 			var font = new ig.Font('media/04b03.png');
 			this.EndImage.draw(0, 0);
-			font.draw('HIT SPACE TO RESTART', 300, 550);
 		}
     }),
     MissionFail = ig.Game.extend({
 		EndImage : new ig.Image('media/missionfail.png'),
 
 		init: function() {
-			ig.input.bind(ig.KEY.SPACE, "LoadGame");
 		},
 
 		update: function() {
@@ -60,7 +53,6 @@ ig.module(
 			this.parent();
 			var font = new ig.Font('media/04b03.png');
 			this.EndImage.draw(0, 0);
-			font.draw('HIT SPACE TO RESTART', 300, 550);
 		}
     }),
 	MyGame = ig.Game.extend({
@@ -77,6 +69,20 @@ ig.module(
 		increaseScore: function(points) {
 			GameInfo.score += points;
 		},
+
+		setScore: function( obj ) {
+			GameInfo.score = obj.score; 
+			GameInfo.killCount = obj.kills; 
+		},
+
+		retrieveScore: function() {
+			return GameInfo.score; 
+		},
+
+		gameLost: function() {
+			console.log("Called lost");
+			ig.system.setGame(MissionFail);
+		},
 		
 		init: function() {
 			ig.input.bind(ig.KEY.A, 'left');
@@ -87,6 +93,8 @@ ig.module(
 			this.loadLevel (LevelLevel1);
 			var player = ig.game.getEntitiesByType('EntityPlayer')[0];
 			this.hud.setMaxHealth(player.health);
+			var mainMusic = new ig.Sound('media/sounds/background.mp3');
+		    mainMusic.play();
 		},
 		
 		update: function() {
@@ -96,17 +104,6 @@ ig.module(
 				this.screen.x = player.pos.x - ig.system.width/2;
 				this.screen.y = player.pos.y - ig.system.height/2;
 			}
-			// if(this.spawnTimer.delta()>0){
-			// 	if (this.getEntitiesByType(EntityEnemy).length < 20) {
-			// 		// console.log(this.getEntitiesByType(EntityEnemy).length);
-			// 		var enemySpawnx = 500 + Math.floor(Math.random()*1100);
-			// 		var enemySpawny = 400 + Math.floor(Math.random()*800);
-			// 		console.log(enemySpawnx, enemySpawny);
-			// 		this.spaw.spawnIf(enemySpawnx, enemySpawny);
-			// 	}
-			// 	this.spawnTimer.set(2);
-			// }
-		
 		},
 		
 		draw: function() {

@@ -17,6 +17,7 @@ ig.module(
     pts: 100,
     lastHit: 'None',
     speed: 30,
+    deeps: 30, 
     tag: '', // This and the the last one at the way bottom are the most important
     		// Tag allows us to assign unique IDs which is important for the database and data handling in general.
     animSheet: new ig.AnimationSheet('media/zombie.png', 32, 32),
@@ -34,6 +35,7 @@ ig.module(
 
     update: function() {
     	var action = ai.getAction(this);
+        var closest = ai.getClosest(this, 'flags');
     	switch(action) {
 		case ig.ai.ACTION.Rest:
 		this.currentAnim = this.anims.idle;
@@ -61,12 +63,13 @@ ig.module(
 		this.vel.y = this.speed;
 		this.animation = 'zombieDown';
 		break;
-		case ig.ai.ACTION.Attack:
+		case 'ig.ai.ACTION.Attack':
 		this.currentAnim = this.anims.idle;
 		this.vel.x = 0;
 		this.vel.y = 0;
 		this.animation = 'idle';
-		ig.game.getEntitiesByType('EntityPlayer')[0].receiveDamage(30, this); 
+		// closest.receiveDamage(30, this);
+        socket.emit('playerDamaged', {name: closest.gamename, damage: this.deeps}); 
 		break; // We're probably gonna have to change this later since everyone's entityPlayer should be
 		default: // Different or maybe not, I need to test it. But we prob. need a more precise way of dealing.
 		this.currentAnim = idle; // my last comments will beo n the AI.
@@ -82,11 +85,6 @@ ig.module(
           console.log('Despawning');
           return;
         };
-    	ig.game.increaseScore(100); //adds to score
-    	ig.game.addKillCount(); //adds to kill count
-    	if (GameInfo.score === 1000) {//Game is WON!
-    		ig.game.gameWon();
-    	}
     	socket.emit("mob_death", {mob: this.mob, tag: this.tag}); // Tells the server who killed the guy and the points. 
     	this.parent();
     }

@@ -33,10 +33,12 @@ exports.handler = function( socket ) {
       snapshot[room].req = 0;
       snapshot[room].init = true; 
   		rooms[room] = {};
-      rooms[room].syncCall = false;         
+      rooms[room].syncCall = false;
+      rooms[room].psocket = {};         
   		rooms[room].playerList = {}; 
   		rooms[room].socketid = {};
-      rooms[room].playerCount = 1;   
+      rooms[room].playerCount = 1;  
+      rooms[room].psocket[instance_name] = socket.id;
   		rooms[room].playerList[instance_name] = instance_name; // Also instances are needed so we can have
   		rooms[room].socketid[socket.id] = socket.id; // unlimited games hosted. 
       sync(rooms[room]);
@@ -227,10 +229,32 @@ exports.handler = function( socket ) {
     scores[instance].name[name].kills += 1; 
     scores[instance].name[name].score += points;
     name_base[name].child('kills').set( scores[instance].name[name].kills );
-    name_base[name].child('score').set( scores[instance].name[name].score );
+    name_base[name].child('score').set( scores[instance].name[name].score , function() {
+       io.sockets.socket(socket.id).emit('updateScore', {score: scores[instance].name[name].score, kills: scores[instance].name[name].kills }
+    )});
+ });
+
+ socket.on('playerDamaged', function( obj ) {
+   var instance = ids[socket.id];
+       instance = rooms[instance];
+       instance = instance.psocket[obj.name];
+   io.sockets.socket(instance).emit('damageTaken', obj.damage);
+ });
+
+ socket.on('defeated', function( name ) {
+   var instance = ids[socket.id];
+       instance = rooms[instance];
+   for(var i in instance.socketid) {
+      if(instance.socketid[i] !== socket.id) {
+        io.sockets.socket(instance.socketid[i]).emit('killPlayer', name);
+      };
+    };
  });
 
  };
+
+
+
 
 
 var sync = function( room ) {
@@ -240,7 +264,7 @@ var sync = function( room ) {
   };
   setTimeout(function() {
     sync(that);
-  },5000);
+  },2000);
 }
 
 var processShot = function( obj, room ) {

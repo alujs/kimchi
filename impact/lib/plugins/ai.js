@@ -14,7 +14,7 @@ ig.module( // move this to back end later.  LOL NOPE.
     	return action;
     },
 
-    getAction: function(entity) {
+    getAction: function(entity, flags) {
       this.entity = entity;
       var distm = '';
       var closest = {};
@@ -37,6 +37,10 @@ ig.module( // move this to back end later.  LOL NOPE.
         closest.distance = distm; 
       }
 
+      if(flags !== undefined) {
+        return closest.player;
+      };
+      
       var angle = this.entity.angleTo(closest.player);
       var x_dist = closest.distance * Math.cos(angle);
       var y_dist = closest.distance * Math.sin(angle);

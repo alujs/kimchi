@@ -109,6 +109,33 @@ socket.on('zrender', function( arr ) { // Renders the zombies.
 	}
 });
 
+socket.on('damageTaken', function( damage ) {
+  var player = ig.game.getEntitiesByType(EntityPlayer);
+  player[0].receiveDamage( damage );
+});
+
+socket.on('killPlayer', function( name ) {
+  var target = ig.game.getEntitiesByType(EntityOtherPlayer);
+  for(var i = 0; i < target.length; i++ ) {
+    if(target.gamename === name) {
+       target.kill(); 
+       return;
+    }
+  }
+});
+
+socket.on('updateScore', function( obj ) {
+  ig.game.setScore(obj);
+});
+
+socket.on('defeat', function() {
+  ig.game.gameLost();
+  alert("Your failure was inevitable, but as a consolation prize here's your score: " + ig.game.retrieveScore())
+});
+
+socket.on('spawnWave', function() {
+
+});
 
 var redraw = function( snapshot ) {
   var mobs = snapshot.mobs;

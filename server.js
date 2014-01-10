@@ -23,15 +23,15 @@ app.use('/signin', function( req, res, next ) {
 
   var fb = new Firebase('https://hrproj.firebaseio.com/Users/' + user + '/pw');
     
-  fb.on('value', function( snapshot ) {
+  // fb.on('value', function( snapshot ) {
     
-     if( snapshot.val() === pw ) {
-       next();
-     } else {
-       res.send('/'); 
-     }
-  });
-
+  //    if( snapshot.val() === pw ) {
+  //      next();
+  //    } else {
+  //      res.send('/'); 
+  //    }
+  // });
+  next();
 
 });
 
