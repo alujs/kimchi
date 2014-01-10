@@ -2,6 +2,7 @@ var socket = io.connect();
 var instance_name = prompt("Player Name"); 
 var room_name = "Room2"; 
 var _loaded = false;
+var counter = 50;
 
 socket.emit('room', room_name, instance_name);
 
@@ -129,14 +130,12 @@ socket.on('updateScore', function( obj ) {
   ig.game.setScore(obj);
 });
 
-socket.on('defeat', function() {
-  ig.game.gameLost();
-  alert("Your failure was inevitable, but as a consolation prize here's your score: " + ig.game.retrieveScore())
-});
+// socket.on('defeat', function() {
+//   ig.game.gameLost();
+//   alert("Your failure was inevitable, but as a consolation prize here's your score: " + ig.game.retrieveScore())
+// });
 
-socket.on('spawnWave', function() {
 
-});
 
 var redraw = function( snapshot ) {
   var mobs = snapshot.mobs;
@@ -189,16 +188,20 @@ var remap = function( snapshot ) {
   for(var i = 0; i < plength; i++) {
     for(var x in snapshot.players) {
       if(snapshot.players[x].tag === pents[i].gamename) {
-        pents[i].pos.x = snapshot.players[x].x; 
-        pents[i].pos.y = snapshot.players[x].y;
+        if(close_or_far(pents[i],snapshot.players[x])) {
+          pents[i].pos.x = snapshot.players[x].x; 
+          pents[i].pos.y = snapshot.players[x].y;
+        }
       }
     }
   }
   for(var k = 0; k < mlength; k++) {
     for(var z in snapshot.mobs) {
       if(snapshot.mobs[z].tag === ments[k].tag && snapshot.mobs[z].type === ments[k].mob) {
-        ments[k].pos.x = snapshot.mobs[z].x;
-        ments[k].pos.y = snapshot.mobs[z].y;
+        if(close_or_far(ments[k],snapshot.mobs[z])) {
+          ments[k].pos.x = snapshot.mobs[z].x;
+          ments[k].pos.y = snapshot.mobs[z].y;
+        }
       }
     }
   } 
@@ -215,3 +218,133 @@ var mobsents = function() {
       results = results.concat(ig.game.getEntitiesByType(EntityEnemy2)); 
   return results;
 }
+
+
+var close_or_far = function(ent, reference) { // resync detector. 
+  var ab = Math.abs;
+  var ex = ab(ent.pos.x);
+  var ey = ab(ent.pos.y);
+  var rx = ab(reference.x);
+  var ry = ab(reference.y);
+
+  if(ex < rx){//
+    if((rx - ex) >= 8){
+      return false; 
+    }
+  };
+  if(rx < ex){
+    if((ex - rx) >= 8){
+      return false; 
+    }
+  };
+  if(ey < ry){
+    if((ry - ey) >= 8){
+      return false; 
+    }
+  };
+  if(ey > ry){
+    if((ey - ry) >= 8){
+      return false; 
+    }
+  };
+  return true;
+};
+
+
+socket.on('Scale', function( difficulty ) {
+  console.log("RAWR!")
+  dif = difficulty.diff;
+  if(dif === 1) {
+    return; 
+  };
+
+  var thing = function(){
+    if(dif === 2){
+      val = 'two';
+    };
+    if(dif === 3){
+      val = 'three';
+    };
+    if(dif === 4){
+      val = 'four';
+    };
+    if(dif === 5){
+      val = 'five';
+    };
+    return val;
+  }();
+
+  ig.music.fadeOut(2000);
+  setTimeout( function(){
+    ig.music.play(thing);
+  }, 2000);
+
+  ig.game.horde.play();
+  activateSpawn(dif);
+
+  var temp = ig.game.getEntitiesByType(EntityEnemy);
+      temp.concat(ig.game.getEntitiesByType(EntityEnemy2));
+  
+  for(var i = 0; i < temp.length; i++ ) {
+      switch(true) {
+        case (dif >= 2): // Mad Nug - time to move like a gundam
+          temp[i].health += 50;
+          temp[i].speed += 20;  
+        case (dif >= 3): // wesker - time to avoid them command grabs 
+          temp[i].speed += 30; 
+        case (dif >= 4): // Cat Groove - time to dance 
+          temp[i].speed += 40;
+          temp[i].health += 50; 
+        case (dif >= 5): // Bonus
+          temp[i].pts += 200; 
+          temp[i].speed += 10;
+          temp[i].health += 100;
+      }
+  }
+});
+
+var activateSpawn = function( dif ) {
+  switch(true) {
+    case (dif === 2):
+      setInterval(function(){
+        for(var x = 0; x < 4; x++) {
+          counter++; 
+          ig.game.spawnEntity(EntityEnemy, 651, 1148, {tag: counter, speed: 300, pts: 150});
+        }
+      }, 8000);
+    break;
+    case (dif === 3):
+      setInterval(function(){
+        for(var x = 0; x < 10; x++) {
+          counter++;
+          ig.game.spawnEntity(EntityEnemy, 921, 1131, {tag: counter, speed: 50, health: 2000, pts: 120, deeps: 40});
+        }
+      }, 4000);
+    break;
+    case (dif === 4):
+      setInterval(function(){
+        for(var x = 0; x < 3; x++) {
+         counter++;
+         ig.game.spawnEntity(EntityEnemy, 1371, 1085, {tag: counter, health: 5, speed: 400, pts: 10, deeps: 80});
+        }
+      }, 6000);
+      setInterval(function(){
+        for(var x = 0; x < 15; x++) {
+          counter++;
+          ig.game.spawnEntity(EntityEnemy, 1322, 485, {tag: counter, health: 800, speed: 130, pts: 130, deeps: 25});
+        }
+      }, 3000);
+    break;
+    case (dif === 5):
+      setInterval(function(){
+        for(var x = 0; x < 25; x++) {
+          counter++;
+          ig.game.spawnEntity(EntityEnemy, 1723, 490, {tag: counter, health: 900, speed: 170, pts: 200, deeps: 80});
+        }
+      }, 7000);
+    break;
+  }
+};
+
+
+

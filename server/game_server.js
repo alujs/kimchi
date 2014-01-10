@@ -43,6 +43,7 @@ exports.handler = function( socket ) {
   		rooms[room].playerList[instance_name] = instance_name; // Also instances are needed so we can have
   		rooms[room].socketid[socket.id] = socket.id; // unlimited games hosted. 
       sync(rooms[room], rooms[room].wait);
+      catgroove(rooms[room]);
 
   	} else {
       rooms[room].playerList[instance_name] = instance_name;
@@ -278,4 +279,22 @@ var cullPlayers = function( instance, room ) {
     }                                
   }
   hasCulled = false;
+};
+
+var catgroove = function( room ) {
+  if(room.difficulty === 5) {
+    return;
+  };
+  
+  for(var i in room.socketid) {
+      io.sockets.socket(room.socketid[i]).emit('Scale', {diff: room.difficulty});
+    };
+
+  var that = room; 
+  var nextDifficulty = that.difficulty * 20000;
+  that.difficulty += 1; 
+
+  setTimeout(function(){
+    catgroove(that);
+  }, nextDifficulty)
 };

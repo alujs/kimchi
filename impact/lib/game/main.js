@@ -60,6 +60,8 @@ ig.module(
 		font: new ig.Font( 'media/04b03.png' ),
 		hud: new ig.hud(),
 		spawnTimer: new ig.Timer(2),
+		horde: new ig.Sound('media/sounds/horde.mp3'),
+		
 		//spaw: new ig.spawnlocations(),
 		
 		addKillCount: function () {
@@ -96,8 +98,19 @@ ig.module(
 			this.loadLevel (LevelLevel1);
 			var player = ig.game.getEntitiesByType('EntityPlayer')[0];
 			this.hud.setMaxHealth(player.health);
-			var mainMusic = new ig.Sound('media/sounds/background.mp3');
-		    mainMusic.play();
+			this.trackone = new ig.Sound('media/sounds/background.mp3');
+			this.tracktwo = new ig.Sound('media/sounds/track2.mp3');
+			this.trackthree = new ig.Sound('media/sounds/track3.mp3');
+			this.trackfour = new ig.Sound('media/sounds/track4.mp3');
+			this.trackfive = new ig.Sound('media/sounds/track5.mp3');
+			ig.music.add(this.trackone, 'one');
+			ig.music.add(this.tracktwo, 'two');
+			ig.music.add(this.trackthree, 'three');
+			ig.music.add(this.trackfour, 'four');
+			ig.music.add(this.trackfive, 'five');
+			ig.music.play('one');
+
+
 		},
 		
 		update: function() {
