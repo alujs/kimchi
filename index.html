@@ -1,28 +1,34 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body>
-  <header>
-    <h1>Kimchi Apocalypse</h1>
-  </header>
-  <section class="game">
-    <a href="/signin"><img src="#"></a>
-  </section>
-  <section class="team">
-    <article class="team-member">
-      <img src="#">
-      <h1>Andrew Lu</h1>
-      <p>Roles and stuff</p>
-      <a href="http://github.com/steinernein">GitHub</a>
-    </article>
-    <article class="team-member">
-      <img src="#">
-      <h1>Andrew Lu</h1>
-      <p>Roles and stuff</p>
-      <a href="http://github.com/steinernein">GitHub</a>
-    </article>
-  </section>
+  <div class="container">
+    <header class="main-header">
+      <h1>Kimchi Apocalypse</h1>
+    </header>
+    <section class="game">
+      <a class="play" href="/signin"><img src="play-image.jpg"></a>
+    </section>
+    <section class="team">
+      <!-- <h1>Team</h1> -->
+      <div class="team-member-wrapper clearfix">
+        <article class="team-member">
+          <img src="andrew-lu.jpg">
+          <h1>Andrew Lu</h1>
+          <p>Responsible for client-server handling, multiplayer integration, deployment, and database handling.</p>
+          <a href="http://github.com/steinernein">GitHub</a>
+        </article>
+        <article class="team-member">
+          <img src="andrew-lim.jpg">
+          <h1>Andrew Lim</h1>
+          <p>Responsible for game mechanics, animations, AI, and game scaffolding.</p>
+          <a href="https://github.com/andrewlim1984">GitHub</a>
+        </article>
+      </div>
+    </section>
+  </div>
   <!-- <div class="normal">	
 	<h1> SIGN IN PLOX </h1>
 	<form class="auth">
@@ -38,11 +44,9 @@
   <script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
   <script>
   	$(document).ready(function() {
-  	  $(".auth").submit(function() {
+  	  $(".play").on('click', function() {
   	  	event.preventDefault();
-  	  	var user = $(".user").val();
-  	  	var pw = $(".pw").val();
-  	  	$.post( "/signin",{'user': user, 'pw': pw}, function(data){
+  	  	$.get( "/signin", function(data){
           window.location = data; 
         });
 

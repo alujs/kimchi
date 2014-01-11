@@ -288,13 +288,15 @@ socket.on('Scale', function( difficulty ) {
   for(var i = 0; i < temp.length; i++ ) {
       switch(true) {
         case (dif >= 2): // Mad Nug - time to move like a gundam
-          temp[i].health += 50;
-          temp[i].speed += 20;  
+          temp[i].health += 10;
+          temp[i].speed += 10;  
         case (dif >= 3): // wesker - time to avoid them command grabs 
           temp[i].speed += 30; 
         case (dif >= 4): // Cat Groove - time to dance 
-          temp[i].speed += 40;
-          temp[i].health += 50; 
+          temp[i].speed += 10;
+          temp[i].health += 70; 
+          temp[i].damage += 10;
+          temp[i].pts += 100;
         case (dif >= 5): // Bonus
           temp[i].pts += 200; 
           temp[i].speed += 10;
