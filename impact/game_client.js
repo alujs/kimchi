@@ -228,22 +228,22 @@ var close_or_far = function(ent, reference) { // resync detector.
   var ry = ab(reference.y);
 
   if(ex < rx){//
-    if((rx - ex) >= 8){
+    if((rx - ex) >= 4){
       return false; 
     }
   };
   if(rx < ex){
-    if((ex - rx) >= 8){
+    if((ex - rx) >= 4){
       return false; 
     }
   };
   if(ey < ry){
-    if((ry - ey) >= 8){
+    if((ry - ey) >= 4){
       return false; 
     }
   };
   if(ey > ry){
-    if((ey - ry) >= 8){
+    if((ey - ry) >= 4){
       return false; 
     }
   };

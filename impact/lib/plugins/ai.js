@@ -60,7 +60,7 @@ ig.module( // move this to back end later.  LOL NOPE.
           return this.doAction(ig.ai.ACTION.MoveRight);
         }
       }
-      if (closest.distance < 70) {
+      if (closest.distance < 30) {
          if(this.attackTimer.delta()>0) {
           this.attackTimer.set(2);
           return this.doAction(ig.ai.ACTION.Attack);
