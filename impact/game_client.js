@@ -1,6 +1,6 @@
 var socket = io.connect();
 var instance_name = prompt("Player Name"); 
-var room_name = "Room2"; 
+var room_name = prompt("Room Name, if you wish to join a friend please input the same room name");
 var _loaded = false;
 var counter = 50;
 
